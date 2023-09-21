@@ -28,11 +28,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.sharedews.ui.theme.ShareDewsTheme
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         setContent {
             ShareDewsTheme {
                 // A surface container using the 'background' color from the theme
@@ -40,7 +47,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomePage()
+                    // Create a NavController
+                    val navController = rememberNavController()
+                    // Pass it to the NavHost composable
+                    NavHost(navController = navController, startDestination = "home") {
+                        composable("home") {
+                            HomePage(navController = navController)
+                        }
+                        // Define other destinations here
+                    }
                 }
             }
         }
@@ -48,22 +63,24 @@ class MainActivity : ComponentActivity() {
 }
 
 
+fun isCredentialsValid(username: String, password: String): Boolean {
+
+    return username.isNotBlank() && password.length >= 6
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun HomePage() {
-    var username by remember { mutableStateOf("")}
-    var password by remember { mutableStateOf("")}
-    var stayLoggedIn by remember {mutableStateOf(false)}
-
-
+fun HomePage(navController: NavHostController) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var stayLoggedIn by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(text = "To-Derp List")
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -106,28 +123,35 @@ fun HomePage() {
                 },
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text = "Stay Logged-In")
-    }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Stay Logged-In")
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         //login button
         Button(
-            onClick = {}
+            onClick = {
+                if (isCredentialsValid(username, password)) {
+                    // Navigate to the "dashboard" destination
+                    navController.navigate("dashboard")
+                } else {
+                    // Display an error message or toast for invalid creds
+                }
+            }
         ) {
             Text(text = "Login")
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {}
+            onClick = {
+                // Navigate to the "registration" destination
+                navController.navigate("registration")
+            }
         ) {
             Text(text = "Create Account")
         }
-
-
     }
 }
