@@ -23,7 +23,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun RegistrationScreen(navController: NavController) {
+fun LoginScreen(navController: NavController) {
+    //login logic
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -32,11 +33,11 @@ fun RegistrationScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "User Registration")
+        Text(text = "User Login")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Email field
+        // email field
         TextField(
             value = email,
             onValueChange = { newEmail ->
@@ -61,30 +62,30 @@ fun RegistrationScreen(navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        //registration button
+        // login button
         Button(
             onClick = {
+                // Check if email and password are valid
                 if (isCredentialsValid(email, password)) {
-                    //call registration function from authmanager
-                    AuthManager.createUserWithEmailAndPassword(email, password)
-                    //navigate to dashboard or another screen upon successful registration
+                    //call the login function from authmanager
+                    AuthManager.signInWithEmailAndPassword(email, password)
+
+                    //navigate to dashboard or other screen upon successful login
                     navController.navigate("dashboard")
                 } else {
-                    //handle invalid creds or display an err msg
+                    //handle invalid credentials or display error message
                 }
             }
         ) {
-            Text(text = "Register")
+            Text(text = "Login")
         }
 
     }
-
 }
+
 
 @Preview
 @Composable
-fun RegistrationScreenPreview() {
-    RegistrationScreen(navController = rememberNavController())
+fun LoginScreenPreview() {
+    LoginScreen(navController = rememberNavController())
 }
