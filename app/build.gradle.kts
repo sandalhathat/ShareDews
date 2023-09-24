@@ -55,9 +55,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-common-ktx:20.3.3")
     implementation("com.google.firebase:firebase-auth-ktx:22.1.2")
-//    implementation("com.google.firebase:firebase-auth:22.1.2")
-
-    val nav_version = "2.7.2"
+    implementation("com.google.firebase:firebase-firestore-ktx:24.8.1")
 
     // import firebase bom
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
@@ -65,6 +63,7 @@ dependencies {
     // TODO: add the dependencies for Firebase products you want to use..
     implementation("com.google.firebase:firebase-analytics-ktx")
 
+    val nav_version = "2.7.2"
     //jetpack compose implementation
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
