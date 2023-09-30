@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 fun RegistrationScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordConfirmation by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -63,10 +64,24 @@ fun RegistrationScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Password confirmation field
+        TextField(
+            value = passwordConfirmation,
+            onValueChange = { newPasswordConfirmation ->
+                passwordConfirmation = newPasswordConfirmation
+            },
+            label = { Text("Confirm Password") },
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         //registration button
         Button(
             onClick = {
-                if (isCredentialsValid(email, password)) {
+                if (isCredentialsValid(email, password) && password == passwordConfirmation) {
                     //call registration function from authmanager
                     AuthManager.createUserWithEmailAndPassword(email, password)
                     //navigate to dashboard or another screen upon successful registration
