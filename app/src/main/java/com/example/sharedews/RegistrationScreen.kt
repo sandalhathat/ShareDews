@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,7 @@ fun RegistrationScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordConfirmation by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) } // Store the error message
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -50,7 +52,7 @@ fun RegistrationScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //password field
+        // Password field
         TextField(
             value = password,
             onValueChange = { newPassword ->
@@ -78,22 +80,37 @@ fun RegistrationScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //registration button
+        // Registration button
         Button(
             onClick = {
                 if (isCredentialsValid(email, password) && password == passwordConfirmation) {
-                    //call registration function from authmanager
+                    // Clear any previous error message
+                    errorMessage = null
+
+                    // Call registration function from AuthManager
                     AuthManager.createUserWithEmailAndPassword(email, password)
-                    //navigate to dashboard or another screen upon successful registration
-                    navController.navigate("dashboard")
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Registration successful, navigate to the dashboard
+                                navController.navigate("dashboard")
+                            } else {
+                                // Registration failed, set the error message
+                                errorMessage = task.exception?.message ?: "Registration failed"
+                            }
+                        }
                 } else {
-                    //handle invalid creds or display an err msg
+                    // Handle invalid credentials or password mismatch
+                    errorMessage = "Invalid credentials or password mismatch"
                 }
             }
         ) {
             Text(text = "Register")
         }
 
+        // Display error message if there is one
+        errorMessage?.let { message ->
+            Text(text = message, color = Color.Red)
+        }
     }
 
 }
