@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
 
 @Composable
 fun RegistrationScreen(navController: NavController) {
@@ -88,16 +90,17 @@ fun RegistrationScreen(navController: NavController) {
                     errorMessage = null
 
                     // Call registration function from AuthManager
-                    AuthManager.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                // Registration successful, navigate to the dashboard
-                                navController.navigate("dashboard")
-                            } else {
-                                // Registration failed, set the error message
-                                errorMessage = task.exception?.message ?: "Registration failed"
-                            }
+                    val authTask: Task<AuthResult> = AuthManager.signInWithEmailAndPassword(email, password)
+                    authTask.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // reg successful, nav to dashboard
+                            navController.navigate("dashboard")
+                        } else {
+                            // Registration failed, set the error message
+                            errorMessage = task.exception?.message ?: "Registration failed"
                         }
+                    }
+
                 } else {
                     // Handle invalid credentials or password mismatch
                     errorMessage = "Invalid credentials or password mismatch"

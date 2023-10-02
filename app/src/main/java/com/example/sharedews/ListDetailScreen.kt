@@ -41,30 +41,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-//import androidx.compose.foundation.clickable
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyColumn
-//import androidx.compose.foundation.text.BasicTextField
-//import androidx.compose.material.icons.Icons
-//import androidx.compose.material.icons.filled.Done
-//import androidx.compose.material.icons.filled.Edit
-//import androidx.compose.material.icons.filled.Star
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.*
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.vector.ImageVector
-//import androidx.compose.ui.tooling.preview.Preview
-//import androidx.compose.ui.unit.dp
-//import androidx.navigation.NavController
-//import androidx.navigation.compose.rememberNavController
-//import com.google.firebase.firestore.FirebaseFirestore
-//import kotlinx.coroutines.CoroutineScope
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.launch
-//import kotlinx.coroutines.tasks.await
-//import kotlinx.coroutines.withContext
-
 @Composable
 fun ListDetailScreen(
     navController: NavController,

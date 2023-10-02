@@ -1,5 +1,7 @@
 package com.example.sharedews
 
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 
 object AuthManager {
@@ -21,18 +23,18 @@ object AuthManager {
     }
 
     // function to sign in an existing user with email and pass
-    fun signInWithEmailAndPassword(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // sign-in successful
-                    val user = auth.currentUser
-                } else {
-                    // sign in failed
-                    val exception = task.exception
-                    // handle failure... like error msg, but later
-                }
-            }
+    fun signInWithEmailAndPassword(email: String, password: String): Task<AuthResult> {
+//        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    // sign-in successful
+//                    val user = auth.currentUser
+//                } else {
+//                    // sign in failed
+//                    val exception = task.exception
+//                    // handle failure... like error msg, but later
+//                }
+//            }
+        return auth.signInWithEmailAndPassword(email, password)
     }
 
     // sign-out function
@@ -43,8 +45,5 @@ object AuthManager {
     fun isUserSignedIn(): Boolean {
         return auth.currentUser != null
     }
-
-
-
 
 }

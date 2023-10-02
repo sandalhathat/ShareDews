@@ -55,12 +55,19 @@ android {
 
 dependencies {
 
-    implementation("com.google.firebase:firebase-common-ktx:20.3.3")
-    implementation("com.google.firebase:firebase-auth-ktx:22.1.2")
-    implementation("com.google.firebase:firebase-firestore-ktx:24.8.1")
-
     // import firebase bom
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+
+    // Explicitly include Firebase products
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+//    implementation("com.google.firebase:firebase-common-ktx:20.3.3")
+//    implementation("com.google.firebase:firebase-auth-ktx:22.1.2")
+//    implementation("com.google.firebase:firebase-firestore-ktx:24.8.1")
+
+
 
     // TODO: add the dependencies for Firebase products you want to use..
     implementation("com.google.firebase:firebase-analytics-ktx")
