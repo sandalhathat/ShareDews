@@ -1,6 +1,7 @@
 package com.example.sharedews
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+        Log.d("FirebaseInit", "Firebase initialized: ${FirebaseApp.getInstance().name}")
         setContent {
             ShareDewsTheme {
                 // A surface container using the 'background' color from the theme
