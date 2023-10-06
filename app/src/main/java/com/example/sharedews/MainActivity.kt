@@ -19,42 +19,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val auth: FirebaseAuth = Firebase.auth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Log.d("FirebaseInit", "Firebase initialized: ${FirebaseApp.getInstance().name}")
         setContent {
             ShareDewsTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Create a NavController
                     val navController = rememberNavController()
-                    // Pass it to the NavHost composable
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             HomePage(navController = navController)
                         }
-                        // Define other destinations here
                         composable("dashboard") {
                             DashboardScreen(navController = navController)
                         }
@@ -62,18 +61,27 @@ class MainActivity : ComponentActivity() {
                             RegistrationScreen(navController = navController)
                         }
                     }
+                    val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+                        val currentUser = auth.currentUser
+                        val isEmailVerified = currentUser?.isEmailVerified == true
+
+                        if (currentUser != null && isEmailVerified) {
+                            navController.navigate("dashboard")
+                        }
+                    }
+                    auth.addAuthStateListener(authStateListener)
                 }
             }
         }
     }
 }
 
+// Rest of the code...
+
 
 fun isCredentialsValid(username: String, password: String): Boolean {
-
     return username.isNotBlank() && password.length >= 6
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,16 +90,24 @@ fun HomePage(navController: NavHostController) {
     var password by remember { mutableStateOf("") }
     var stayLoggedIn by remember { mutableStateOf(false) }
 
+    val auth = Firebase.auth
+    val currentUser = auth.currentUser
+    val isEmailVerified = currentUser?.isEmailVerified == true
+
+    if (currentUser != null && isEmailVerified) {
+        LaunchedEffect(Unit) {
+            navController.navigate("dashboard")
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "To-Derp List")
-
+        Text(text = "Shared Todo List")
         Spacer(modifier = Modifier.height(16.dp))
 
-        //username
         TextField(
             value = username,
             onValueChange = { newUsername ->
@@ -104,7 +120,6 @@ fun HomePage(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //pw txtfld
         TextField(
             value = password,
             onValueChange = { newPassword ->
@@ -116,7 +131,6 @@ fun HomePage(navController: NavHostController) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        //stay logged-in checkbox
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
@@ -135,14 +149,19 @@ fun HomePage(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        //login button
         Button(
             onClick = {
                 if (isCredentialsValid(username, password)) {
-                    // Navigate to the "dashboard" destination
-                    navController.navigate("dashboard")
+                    lifecycleScope.launch {
+                        try {
+                            val authResult = AuthManager.signInWithEmailAndPassword(username, password)
+                            navController.navigate("dashboard")
+                        } catch (e: Exception) {
+                            // Handle authentication error
+                        }
+                    }
                 } else {
-                    // Display an error message or toast for invalid creds
+                    // Display an error message or toast for invalid credentials
                 }
             }
         ) {
@@ -153,7 +172,6 @@ fun HomePage(navController: NavHostController) {
 
         Button(
             onClick = {
-                // Navigate to the "registration" destination
                 navController.navigate("registration")
             }
         ) {

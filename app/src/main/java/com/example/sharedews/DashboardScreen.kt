@@ -1,5 +1,6 @@
 package com.example.sharedews
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +34,20 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun DashboardScreen(navController: NavController) {
+    val mAuth = FirebaseAuth.getInstance()
+    val currentUser = mAuth.currentUser
+
+    if (currentUser != null && currentUser.isEmailVerified) {
+        // User is logged in and email is verified, display dashboard content
+        DashboardContent(navController)
+    } else {
+        // User is not logged in or email is not verified, display a message
+        AccessRestrictedMessage(navController)
+    }
+}
+
+@Composable
+private fun DashboardContent(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,9 +65,14 @@ fun DashboardScreen(navController: NavController) {
         var lists by remember { mutableStateOf(emptyList<String>()) }
 
         LaunchedEffect(Unit) {
-            val snapshot = collection.get().await()
-            val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
-            lists = listNames
+            try {
+                val snapshot = collection.get().await()
+                val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
+                lists = listNames
+            } catch (e: Exception) {
+                Log.e("DashboardScreen", "Error reading from Firestore: ${e.message}")
+                e.printStackTrace()
+            }
         }
 
         // Display lists
@@ -96,7 +114,6 @@ fun DashboardScreen(navController: NavController) {
                 onValueChange = {
                     newListName = TextFieldValue(text = it)
                 },
-                textStyle = LocalTextStyle.current, // Add this line
                 modifier = Modifier
                     .weight(1f)
                     .padding(4.dp)
@@ -104,24 +121,25 @@ fun DashboardScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    // Create a new list in Firestore
-                    if (newListName.text.isNotEmpty()) {
-                        val newList = mapOf(
-                            "listName" to newListName.text,
-                            "createdAt" to System.currentTimeMillis()
-                        )
+                    try {
+                        // Create a new list in Firestore
+                        if (newListName.text.isNotEmpty()) {
+                            val newList = mapOf(
+                                "listName" to newListName.text,
+                                "createdAt" to System.currentTimeMillis()
+                            )
 
-                        // Use a coroutine to write to Firestore
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
+                            // Use a coroutine to write to Firestore
+                            CoroutineScope(Dispatchers.IO).launch {
                                 collection.add(newList).await()
                                 withContext(Dispatchers.Main) {
                                     newListName = TextFieldValue()
                                 }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
                             }
                         }
+                    } catch (e: Exception) {
+                        Log.e("DashboardScreen", "Error creating list: ${e.message}")
+                        e.printStackTrace()
                     }
                 },
                 modifier = Modifier
@@ -133,8 +151,22 @@ fun DashboardScreen(navController: NavController) {
     }
 }
 
-@Preview
 @Composable
-fun DashboardScreenPreview() {
-    DashboardScreen(navController = rememberNavController())
+private fun AccessRestrictedMessage(navController: NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Dashboard Access Restricted")
+        Text(text = "Please log in and verify your email to access the dashboard.")
+        Button(
+            onClick = {
+                // Navigate back to the login or registration screen
+                navController.navigate("home")
+            }
+        ) {
+            Text(text = "Go Back")
+        }
+    }
 }

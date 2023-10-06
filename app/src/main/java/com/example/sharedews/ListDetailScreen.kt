@@ -48,21 +48,17 @@ fun ListDetailScreen(
 ) {
     var newListName by remember { mutableStateOf(listName) }
     var isEditing by remember { mutableStateOf(false) }
-
     // Firestore
     val db = FirebaseFirestore.getInstance()
     val collection = db.collection("lists")
-
     // Suspend function to update the list name in Firestore
     suspend fun updateListNameInFirestore(newName: String) {
         collection.document(listName)
             .update("listName", newName)
             .await()
     }
-
     // Create a mutable list of list items
     var listItems by remember { mutableStateOf(generateListItems()) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,7 +88,6 @@ fun ListDetailScreen(
                     modifier = Modifier.padding(4.dp)
                 )
             }
-
             IconButton(
                 onClick = {
                     if (isEditing) {
@@ -128,10 +123,8 @@ fun ListDetailScreen(
                 }
             }
         }
-
         // Render the list of items
         ListItems(listItems)
-
         // Button to add a new item
         Button(
             onClick = {
@@ -144,46 +137,6 @@ fun ListDetailScreen(
         }
     }
 }
-
-//@Composable
-//fun ListItems(listItems: List<ListItem>) {
-//    LazyColumn(
-//        modifier = Modifier.fillMaxSize()
-//    ) {
-//        items(listItems.size) { index ->
-//            val item = listItems[index]
-//            ListItem(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .clickable {
-//                        // Handle item click here
-//                    },
-//                text = {
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        CustomIcon(
-//                            icon = Icons.Default.Star,
-//                            tint = MaterialTheme.colorScheme.primary
-//                        )
-//                        Spacer(modifier = Modifier.width(16.dp))
-//                        Column {
-//                            Text(
-//                                text = item.text,
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                            Text(
-//                                text = "Additional Info",
-//                                style = MaterialTheme.typography.bodySmall
-//                            )
-//                        }
-//                    }
-//                }
-//            )
-//        }
-//    }
-//}
-
 @Composable
 fun ListItems(listItems: List<ListItem>) {
     LazyColumn(
@@ -192,7 +145,6 @@ fun ListItems(listItems: List<ListItem>) {
         items(listItems) { item ->
             // Destructure the item to access its properties
             val text = item.text
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,19 +176,13 @@ fun ListItems(listItems: List<ListItem>) {
         }
     }
 }
-
-
-
-
 data class ListItem(val text: String)
-
 fun generateListItems(): List<ListItem> {
     // Replace this with your logic to fetch items from Firestore or elsewhere
     return List(10) { index ->
         ListItem("List Item $index")
     }
 }
-
 @Composable
 fun CustomIcon(
     icon: ImageVector,
@@ -248,7 +194,6 @@ fun CustomIcon(
         tint = tint
     )
 }
-
 @Preview
 @Composable
 fun ListDetailScreenPreview() {
