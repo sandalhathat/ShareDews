@@ -74,108 +74,109 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
 // Rest of the code...
 
 
-fun isCredentialsValid(username: String, password: String): Boolean {
-    return username.isNotBlank() && password.length >= 6
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomePage(navController: NavHostController) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var stayLoggedIn by remember { mutableStateOf(false) }
-
-    val auth = Firebase.auth
-    val currentUser = auth.currentUser
-    val isEmailVerified = currentUser?.isEmailVerified == true
-
-    if (currentUser != null && isEmailVerified) {
-        LaunchedEffect(Unit) {
-            navController.navigate("dashboard")
-        }
+    fun isCredentialsValid(username: String, password: String): Boolean {
+        return username.isNotBlank() && password.length >= 6
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Shared Todo List")
-        Spacer(modifier = Modifier.height(16.dp))
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun HomePage(navController: NavHostController) {
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var stayLoggedIn by remember { mutableStateOf(false) }
 
-        TextField(
-            value = username,
-            onValueChange = { newUsername ->
-                username = newUsername
-            },
-            label = { Text("Username") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+        val auth = Firebase.auth
+        val currentUser = auth.currentUser
+        val isEmailVerified = currentUser?.isEmailVerified == true
 
-        Spacer(modifier = Modifier.height(16.dp))
+        if (currentUser != null && isEmailVerified) {
+            LaunchedEffect(Unit) {
+                navController.navigate("dashboard")
+            }
+        }
 
-        TextField(
-            value = password,
-            onValueChange = { newPassword ->
-                password = newPassword
-            },
-            label = { Text("Password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Checkbox(
-                checked = stayLoggedIn,
-                onCheckedChange = { checked ->
-                    stayLoggedIn = checked
+            Text(text = "Shared Todo List")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = username,
+                onValueChange = { newUsername ->
+                    username = newUsername
                 },
-                modifier = Modifier.align(Alignment.CenterVertically)
+                label = { Text("Username") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Stay Logged-In")
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                if (isCredentialsValid(username, password)) {
-                    lifecycleScope.launch {
-                        try {
-                            val authResult = AuthManager.signInWithEmailAndPassword(username, password)
-                            navController.navigate("dashboard")
-                        } catch (e: Exception) {
-                            // Handle authentication error
+            TextField(
+                value = password,
+                onValueChange = { newPassword ->
+                    password = newPassword
+                },
+                label = { Text("Password") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = stayLoggedIn,
+                    onCheckedChange = { checked ->
+                        stayLoggedIn = checked
+                    },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Stay Logged-In")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (isCredentialsValid(username, password)) {
+                        lifecycleScope.launch {
+                            try {
+                                AuthManager.signInWithEmailAndPassword(username, password)
+                                navController.navigate("dashboard")
+                            } catch (e: Exception) {
+                                // Handle authentication error
+                            }
                         }
+                    } else {
+                        // Display an error message or toast for invalid credentials
                     }
-                } else {
-                    // Display an error message or toast for invalid credentials
                 }
+            ) {
+                Text(text = "Login")
             }
-        ) {
-            Text(text = "Login")
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                navController.navigate("registration")
+            Button(
+                onClick = {
+                    navController.navigate("registration")
+                }
+            ) {
+                Text(text = "Create Account")
             }
-        ) {
-            Text(text = "Create Account")
         }
     }
 }
+

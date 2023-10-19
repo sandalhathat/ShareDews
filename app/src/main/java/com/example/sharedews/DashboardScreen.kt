@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,7 @@ fun DashboardScreen(navController: NavController) {
 
     if (currentUser != null && currentUser.isEmailVerified) {
         // User is logged in and email is verified, display dashboard content
-        DashboardContent(navController)
+        DashboardContent(navController, currentUser)
     } else {
         // User is not logged in or email is not verified, display a message
         AccessRestrictedMessage(navController)
@@ -47,7 +48,7 @@ fun DashboardScreen(navController: NavController) {
 }
 
 @Composable
-private fun DashboardContent(navController: NavController) {
+private fun DashboardContent(navController: NavController, currentUser: FirebaseUser) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -148,6 +149,20 @@ private fun DashboardContent(navController: NavController) {
                 Text(text = "Create List")
             }
         }
+
+        // Logout button
+        Button(
+            onClick = {
+                // log out the user and nav back to the login or reg screen
+                AuthManager.signOut()
+                navController.navigate("home")
+            },
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(text = "Log out")
+        }
+
+
     }
 }
 

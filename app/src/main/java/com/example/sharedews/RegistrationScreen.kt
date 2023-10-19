@@ -9,13 +9,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegistrationScreen(navController: NavController) {
@@ -23,11 +28,11 @@ fun RegistrationScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var passwordConfirmation by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "User Registration")
         Spacer(modifier = Modifier.height(16.dp))
@@ -72,21 +77,29 @@ fun RegistrationScreen(navController: NavController) {
 
         Button(
             onClick = {
-                if (isCredentialsValid(email, password) && password == passwordConfirmation) {
-                    errorMessage = null
-                    LaunchedEffect(Unit) {
+                scope.launch {
+                    if (isCredentialsValid(email, password) && password == passwordConfirmation) {
                         try {
-                            val authResult = AuthManager.createUserWithEmailAndPassword(email, password)
-                            navController.navigate("dashboard")
+                            val authResult =
+                                AuthManager.createUserWithEmailAndPassword(email, password)
+                            if (authResult.user != null) {
+                                // Registration successful, navigate to the dashboard
+                                navController.navigate("dashboard")
+                            } else {
+                                // Registration failed, handle the error
+                                errorMessage = "Registration failed"
+                            }
                         } catch (e: Exception) {
+                            // Handle any exceptions
                             errorMessage = e.message ?: "Registration failed"
                         }
+                    } else {
+                        errorMessage = "Invalid credentials or password mismatch"
                     }
-                } else {
-                    errorMessage = "Invalid credentials or password mismatch"
                 }
             }
-        ) {
+        )
+        {
             Text(text = "Register")
         }
 
@@ -94,4 +107,8 @@ fun RegistrationScreen(navController: NavController) {
             Text(text = message, color = Color.Red)
         }
     }
+}
+
+fun isCredentialsValid(email: String, password: String): Boolean {
+    return email.isNotBlank() && password.length >= 6
 }
