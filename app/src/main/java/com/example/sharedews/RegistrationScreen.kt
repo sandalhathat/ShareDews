@@ -20,7 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun RegistrationScreen(navController: NavController) {
@@ -77,29 +83,20 @@ fun RegistrationScreen(navController: NavController) {
 
         Button(
             onClick = {
-                scope.launch {
-                    if (isCredentialsValid(email, password) && password == passwordConfirmation) {
-                        try {
-                            val authResult =
-                                AuthManager.createUserWithEmailAndPassword(email, password)
-                            if (authResult.user != null) {
-                                // Registration successful, navigate to the dashboard
-                                navController.navigate("dashboard")
-                            } else {
-                                // Registration failed, handle the error
-                                errorMessage = "Registration failed"
-                            }
-                        } catch (e: Exception) {
-                            // Handle any exceptions
-                            errorMessage = e.message ?: "Registration failed"
+                handleRegistration(email, password, passwordConfirmation, scope, navController) { result ->
+                    when (result) {
+                        is RegistrationResult.Success -> {
+                            // Registration successful, navigate to the dashboard
+                            navController.navigate("dashboard")
                         }
-                    } else {
-                        errorMessage = "Invalid credentials or password mismatch"
+                        is RegistrationResult.Failure -> {
+                            // Registration failed, handle the error
+                            errorMessage = result.error
+                        }
                     }
                 }
             }
-        )
-        {
+        ) {
             Text(text = "Register")
         }
 
@@ -109,6 +106,98 @@ fun RegistrationScreen(navController: NavController) {
     }
 }
 
+sealed class RegistrationResult {
+    data class Success(val user: FirebaseUser) : RegistrationResult()
+    data class Failure(val error: String) : RegistrationResult()
+}
+
+fun handleRegistration(
+    email: String,
+    password: String,
+    passwordConfirmation: String,
+    scope: CoroutineScope,
+    navController: NavController,
+    resultCallback: (RegistrationResult) -> Unit
+) {
+    scope.launch {
+        if (isCredentialsValid(email, password) && password == passwordConfirmation) {
+            try {
+                val auth = Firebase.auth
+                val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+                val user = authResult.user
+
+                // Check if user is not null and send email verification
+                if (user != null) {
+                    user.sendEmailVerification().await()
+
+                    // Call the function to add user data to the database
+                    addUserDataToDatabase(user, UserData(user.uid, email, ""))
+
+                    resultCallback(RegistrationResult.Success(user))
+                } else {
+                    resultCallback(RegistrationResult.Failure("Registration failed"))
+                }
+            } catch (e: Exception) {
+                resultCallback(RegistrationResult.Failure(e.message ?: "Registration failed"))
+            }
+        } else {
+            resultCallback(RegistrationResult.Failure("Invalid credentials or password mismatch"))
+        }
+    }
+}
+
+
+//fun handleRegistration(
+//    email: String,
+//    password: String,
+//    passwordConfirmation: String,
+//    scope: CoroutineScope,
+//    navController: NavController,
+//    resultCallback: (RegistrationResult) -> Unit
+//) {
+//    scope.launch {
+//        if (isCredentialsValid(email, password) && password == passwordConfirmation) {
+//            try {
+//                val auth = Firebase.auth
+//                val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+//                val user = authResult.user
+//
+//                // Check if user is not null and send email verification
+//                if (user != null) {
+//                    user.sendEmailVerification().await()
+//                    resultCallback(RegistrationResult.Success(user))
+//                } else {
+//                    resultCallback(RegistrationResult.Failure("Registration failed"))
+//                }
+//            } catch (e: Exception) {
+//                resultCallback(RegistrationResult.Failure(e.message ?: "Registration failed"))
+//            }
+//        } else {
+//            resultCallback(RegistrationResult.Failure("Invalid credentials or password mismatch"))
+//        }
+//    }
+//}
+
 fun isCredentialsValid(email: String, password: String): Boolean {
     return email.isNotBlank() && password.length >= 6
+}
+
+fun addUserDataToDatabase(user: FirebaseUser, userData: UserData) {
+    val db = Firebase.firestore
+
+    // check if user email is verified
+    if (user.isEmailVerified) {
+        // add data to database
+        db.collection("users")
+            .document(user.uid)
+            .set(userData)
+            .addOnSuccessListener {
+                // data added auccessfully
+            }
+            .addOnFailureListener { e ->
+                // handle the error
+            }
+    } else {
+        // handle case where user email is not verified
+    }
 }
