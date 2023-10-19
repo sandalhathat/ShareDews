@@ -192,7 +192,7 @@ fun addUserDataToDatabase(user: FirebaseUser, userData: UserData) {
             .document(user.uid)
             .set(userData)
             .addOnSuccessListener {
-                // data added auccessfully
+                // data added successfully
             }
             .addOnFailureListener { e ->
                 // handle the error
