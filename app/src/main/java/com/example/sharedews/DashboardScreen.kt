@@ -24,18 +24,14 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuth.getInstance
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 
 @Composable
 fun DashboardScreen(navController: NavController) {
-    val mAuth = FirebaseAuth.getInstance()
+    val mAuth = getInstance()
     val currentUser = mAuth.currentUser
 
     if (currentUser != null && currentUser.isEmailVerified) {
@@ -122,26 +118,8 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
 
             Button(
                 onClick = {
-                    try {
-                        // Create a new list in Firestore
-                        if (newListName.text.isNotEmpty()) {
-                            val newList = mapOf(
-                                "listName" to newListName.text,
-                                "createdAt" to System.currentTimeMillis()
-                            )
-
-                            // Use a coroutine to write to Firestore
-                            CoroutineScope(Dispatchers.IO).launch {
-                                collection.add(newList).await()
-                                withContext(Dispatchers.Main) {
-                                    newListName = TextFieldValue()
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e("DashboardScreen", "Error creating list: ${e.message}")
-                        e.printStackTrace()
-                    }
+                    // Navigate to the CreateListScreen
+                    navController.navigate("createList")
                 },
                 modifier = Modifier
                     .padding(4.dp)
@@ -161,8 +139,6 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
         ) {
             Text(text = "Log out")
         }
-
-
     }
 }
 

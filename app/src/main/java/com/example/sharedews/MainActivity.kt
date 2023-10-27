@@ -75,9 +75,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-// Rest of the code...
-
-
     fun isCredentialsValid(username: String, password: String): Boolean {
         return username.isNotBlank() && password.length >= 6
     }
@@ -88,6 +85,7 @@ class MainActivity : ComponentActivity() {
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var stayLoggedIn by remember { mutableStateOf(false) }
+        var showErrorSnackbar by remember { mutableStateOf(false) }
 
         val auth = Firebase.auth
         val currentUser = auth.currentUser
@@ -153,18 +151,30 @@ class MainActivity : ComponentActivity() {
                     if (isCredentialsValid(username, password)) {
                         lifecycleScope.launch {
                             try {
-                                AuthManager.signInWithEmailAndPassword(username, password)
-                                navController.navigate("dashboard")
+
+                                val result =
+                                    AuthManager.signInWithEmailAndPassword(username, password)
+                                if (result.user != null) {
+                                    navController.navigate("dashboard")
+                                }
+                                // Handle case where the user is not authenticated even though no exception was thrown
+                                showErrorSnackbar = true
                             } catch (e: Exception) {
-                                // Handle authentication error
+                                showErrorSnackbar = true
+                                Log.e("LoginError", "Authentication failed: ${e.message}")
                             }
                         }
                     } else {
-                        // Display an error message or toast for invalid credentials
+                        showErrorSnackbar = true
                     }
                 }
             ) {
                 Text(text = "Login")
+            }
+
+            if (showErrorSnackbar) {
+                // You can display a Snackbar or some other UI element to show the error message.
+                Text(text = "Authentication failed. Please check your credentials.")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -179,4 +189,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

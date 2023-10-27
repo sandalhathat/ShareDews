@@ -146,38 +146,6 @@ fun handleRegistration(
     }
 }
 
-
-//fun handleRegistration(
-//    email: String,
-//    password: String,
-//    passwordConfirmation: String,
-//    scope: CoroutineScope,
-//    navController: NavController,
-//    resultCallback: (RegistrationResult) -> Unit
-//) {
-//    scope.launch {
-//        if (isCredentialsValid(email, password) && password == passwordConfirmation) {
-//            try {
-//                val auth = Firebase.auth
-//                val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-//                val user = authResult.user
-//
-//                // Check if user is not null and send email verification
-//                if (user != null) {
-//                    user.sendEmailVerification().await()
-//                    resultCallback(RegistrationResult.Success(user))
-//                } else {
-//                    resultCallback(RegistrationResult.Failure("Registration failed"))
-//                }
-//            } catch (e: Exception) {
-//                resultCallback(RegistrationResult.Failure(e.message ?: "Registration failed"))
-//            }
-//        } else {
-//            resultCallback(RegistrationResult.Failure("Invalid credentials or password mismatch"))
-//        }
-//    }
-//}
-
 fun isCredentialsValid(email: String, password: String): Boolean {
     return email.isNotBlank() && password.length >= 6
 }
