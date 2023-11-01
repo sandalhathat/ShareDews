@@ -4,7 +4,6 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-//    id("com.google.gms.google-services") version "4.3.15" apply false
     id("com.google.gms.google-services") version "4.3.15"
 }
 
@@ -19,7 +18,6 @@ android {
     defaultConfig {
         applicationId = "com.example.sharedews"
         minSdk = 24
-//        targetSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -79,11 +77,13 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // TODO: add the dependencies for Firebase products you want to use..
-    implementation("com.google.firebase:firebase-analytics-ktx")
+//    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-appcheck-ktx:17.1.1")
 
     val nav_version = "2.7.2"
     //jetpack compose implementation
@@ -94,8 +94,6 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.10.00"))
     implementation("androidx.compose.ui:ui")
-//    implementation("androidx.compose.ui:ui-graphics")
-//    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
     testImplementation("junit:junit:4.13.2")

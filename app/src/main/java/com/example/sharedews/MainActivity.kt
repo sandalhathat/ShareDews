@@ -36,6 +36,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
+
 class MainActivity : ComponentActivity() {
     private val auth: FirebaseAuth = Firebase.auth
 
@@ -43,6 +44,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Log.d("FirebaseInit", "Firebase initialized: ${FirebaseApp.getInstance().name}")
+//        val recaptchaProvider = RecaptchaAppCheckProvider.Factory().create()
+//        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(recaptchaProvider)
         setContent {
             ShareDewsTheme {
                 Surface(
@@ -149,6 +152,12 @@ class MainActivity : ComponentActivity() {
             Button(
                 onClick = {
                     if (isCredentialsValid(username, password)) {
+
+                        // manually initiate recaptcha verification
+//                        val reCaptcha = FirebaseAppCheck.getInstance().getRecaptcha()
+//                        val recaptchaUrl = ""
+//                        val recaptchaTokenTask = reCaptcha?.token(recaptchaUrl)
+
                         lifecycleScope.launch {
                             try {
 
