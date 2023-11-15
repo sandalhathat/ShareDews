@@ -71,7 +71,7 @@ android {
 dependencies {
 
     // import firebase bom
-    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
 
     // Explicitly include Firebase products
     implementation("com.google.firebase:firebase-analytics-ktx")
@@ -80,26 +80,27 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.7.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("com.google.firebase:firebase-appcheck-ktx:17.1.1")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity:17.1.1")
 
     // TODO: add the dependencies for Firebase products you want to use..
 //    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-appcheck-ktx:17.1.1")
 
     val nav_version = "2.7.2"
     //jetpack compose implementation
-    implementation("androidx.navigation:navigation-compose:2.7.4")
+    implementation("androidx.navigation:navigation-compose:2.7.5")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.7.2")
-    implementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
     debugImplementation("androidx.compose.ui:ui-tooling")

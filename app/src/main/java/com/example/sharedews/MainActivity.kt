@@ -31,7 +31,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.ktx.appCheck
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
@@ -40,12 +43,28 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val auth: FirebaseAuth = Firebase.auth
 
+    //    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        FirebaseApp.initializeApp(this)
+//        Log.d("FirebaseInit", "Firebase initialized: ${FirebaseApp.getInstance().name}")
+//        Firebase.appCheck.installAppCheckProviderFactory(PlayIntegrityAppCheckProviderFactory.getInstance(),)
+//            .addOnFailureListener { exception ->
+//                Log.e("AppCheckError", "Error installing App Check: ${exception.message}")
+//            }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Log.d("FirebaseInit", "Firebase initialized: ${FirebaseApp.getInstance().name}")
-//        val recaptchaProvider = RecaptchaAppCheckProvider.Factory().create()
-//        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(recaptchaProvider)
+
+        try {
+            Firebase.appCheck.installAppCheckProviderFactory(PlayIntegrityAppCheckProviderFactory.getInstance())
+        } catch (exception: Exception) {
+            Log.e("AppCheckError", "Error installing App Check: ${exception.message}")
+        }
+
+        // ... rest of your code
+//}
+
         setContent {
             ShareDewsTheme {
                 Surface(
@@ -152,21 +171,23 @@ class MainActivity : ComponentActivity() {
             Button(
                 onClick = {
                     if (isCredentialsValid(username, password)) {
-
-                        // manually initiate recaptcha verification
-//                        val reCaptcha = FirebaseAppCheck.getInstance().getRecaptcha()
-//                        val recaptchaUrl = ""
-//                        val recaptchaTokenTask = reCaptcha?.token(recaptchaUrl)
-
                         lifecycleScope.launch {
                             try {
-
                                 val result =
                                     AuthManager.signInWithEmailAndPassword(username, password)
                                 if (result.user != null) {
                                     navController.navigate("dashboard")
+                                } else {
+                                    // Log invalid credentials
+                                    Log.e(
+                                        "LoginError",
+                                        "Authentication failed: Invalid credentials"
+                                    )
+                                    showErrorSnackbar = true
                                 }
+                            } catch (e: FirebaseAuthInvalidCredentialsException) {
                                 // Handle case where the user is not authenticated even though no exception was thrown
+                                Log.e("LoginError", "Authentication failed: ${e.message}")
                                 showErrorSnackbar = true
                             } catch (e: Exception) {
                                 showErrorSnackbar = true
@@ -174,6 +195,11 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     } else {
+                        // Handling invalid credentials
+                        Log.e(
+                            "LoginError",
+                            "Invalid credentials: Username should not be blank, password must be at least 6 characters."
+                        )
                         showErrorSnackbar = true
                     }
                 }

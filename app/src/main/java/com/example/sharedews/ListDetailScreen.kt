@@ -30,10 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -194,8 +192,8 @@ fun CustomIcon(
         tint = tint
     )
 }
-@Preview
-@Composable
-fun ListDetailScreenPreview() {
-    ListDetailScreen(navController = rememberNavController(), listName = "YourListName")
-}
+//@Preview
+//@Composable
+//fun ListDetailScreenPreview() {
+//    ListDetailScreen(navController = rememberNavController(), listName = "YourListName")
+//}
