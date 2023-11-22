@@ -118,8 +118,8 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
 
             Button(
                 onClick = {
-                    // Navigate to the CreateListScreen
-                    navController.navigate("createList")
+                    // Navigate to the NewListScreen
+                    navController.navigate("newList")
                 },
                 modifier = Modifier
                     .padding(4.dp)

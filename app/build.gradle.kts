@@ -71,7 +71,7 @@ android {
 dependencies {
 
     // import firebase bom
-    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
 
     // Explicitly include Firebase products
     implementation("com.google.firebase:firebase-analytics-ktx")
@@ -83,16 +83,13 @@ dependencies {
     implementation("com.google.firebase:firebase-appcheck-ktx:17.1.1")
     implementation("com.google.firebase:firebase-appcheck-playintegrity:17.1.1")
 
-    // TODO: add the dependencies for Firebase products you want to use..
-//    implementation("com.google.firebase:firebase-analytics-ktx")
-
     val nav_version = "2.7.2"
     //jetpack compose implementation
     implementation("androidx.navigation:navigation-compose:2.7.5")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation("androidx.activity:activity-compose:1.8.1")
     implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")

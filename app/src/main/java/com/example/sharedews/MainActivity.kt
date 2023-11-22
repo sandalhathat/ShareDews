@@ -82,6 +82,9 @@ class MainActivity : ComponentActivity() {
                         composable("registration") {
                             RegistrationScreen(navController = navController)
                         }
+                        composable("newList") {
+                            NewListScreen(navController = navController)
+                        }
                     }
                     val authStateListener = FirebaseAuth.AuthStateListener { auth ->
                         val currentUser = auth.currentUser

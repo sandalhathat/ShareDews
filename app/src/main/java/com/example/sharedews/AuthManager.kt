@@ -1,5 +1,6 @@
 package com.example.sharedews
 
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -19,7 +20,12 @@ object AuthManager {
 
     suspend fun signInWithEmailAndPassword(email: String, password: String): AuthResult {
         return withContext(Dispatchers.IO) {
-            auth.signInWithEmailAndPassword(email, password).await()
+            try {
+                auth.signInWithEmailAndPassword(email, password).await()
+            } catch (e: Exception) {
+                Log.e("SignIn", "Email sign-in failed: $e")
+                throw e
+            }
         }
     }
 

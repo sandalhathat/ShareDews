@@ -192,8 +192,3 @@ fun CustomIcon(
         tint = tint
     )
 }
-//@Preview
-//@Composable
-//fun ListDetailScreenPreview() {
-//    ListDetailScreen(navController = rememberNavController(), listName = "YourListName")
-//}
