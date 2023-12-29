@@ -15,13 +15,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -43,14 +48,6 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val auth: FirebaseAuth = Firebase.auth
 
-    //    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        FirebaseApp.initializeApp(this)
-//        Log.d("FirebaseInit", "Firebase initialized: ${FirebaseApp.getInstance().name}")
-//        Firebase.appCheck.installAppCheckProviderFactory(PlayIntegrityAppCheckProviderFactory.getInstance(),)
-//            .addOnFailureListener { exception ->
-//                Log.e("AppCheckError", "Error installing App Check: ${exception.message}")
-//            }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
@@ -62,16 +59,20 @@ class MainActivity : ComponentActivity() {
             Log.e("AppCheckError", "Error installing App Check: ${exception.message}")
         }
 
-        // ... rest of your code
-//}
-
         setContent {
             ShareDewsTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+//                    color = MaterialTheme.colorScheme.background
+                    color = Color.Black,
                 ) {
                     val navController = rememberNavController()
+
+                    // THIS IS WHERE NAV HOST IS //
+                    // THIS IS WHERE NAV HOST IS //
+                    // THIS IS WHERE NAV HOST IS //
+                    // THIS IS WHERE NAV HOST IS //
+
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             HomePage(navController = navController)
@@ -83,9 +84,25 @@ class MainActivity : ComponentActivity() {
                             RegistrationScreen(navController = navController)
                         }
                         composable("newList") {
-                            NewListScreen(navController = navController)
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = Color.Magenta,
+                            ) {
+                                NewListScreen(navController = navController)
+                            }
+                        }
+                        composable("listDetail/{listName}") { backStackEntry ->
+                            val listName = backStackEntry.arguments?.getString("listName")
+                            // handle nav to listDetail dest using listName
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = Color.Cyan,
+                            ) {
+                                Text(text = "List Detail for $listName")
+                            }
                         }
                     }
+
                     val authStateListener = FirebaseAuth.AuthStateListener { auth ->
                         val currentUser = auth.currentUser
                         val isEmailVerified = currentUser?.isEmailVerified == true
@@ -127,7 +144,9 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Shared Todo List")
+            Text(text = "Shared Todo List",
+                color = Color.Green,)
+
             Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
