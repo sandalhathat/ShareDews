@@ -1,6 +1,7 @@
 package com.example.sharedews
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,7 +66,11 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
         LaunchedEffect(Unit) {
             try {
                 val snapshot = collection.get().await()
-                val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
+//                val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
+                val listNames = snapshot.documents.mapNotNull { it.getString("listItem") }
+
+                Log.d("DashboardScreen", "List names from Firestore: $listNames")
+
                 lists = listNames
             } catch (e: Exception) {
                 Log.e("DashboardScreen", "Error reading from Firestore: ${e.message}")
@@ -83,6 +89,7 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
+                .background(color = Color.LightGray)
         ) {
             for (listName in lists) {
                 Text(
@@ -118,7 +125,7 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
 
             Button(
                 onClick = {
-                    // Navigate to the NewListScreen
+                    // Navigate to the CreateListScreen
                     navController.navigate("newList")
                 },
                 modifier = Modifier

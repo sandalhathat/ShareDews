@@ -1,5 +1,6 @@
 package com.example.sharedews
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,14 +51,46 @@ fun ListDetailScreen(
     // Firestore
     val db = FirebaseFirestore.getInstance()
     val collection = db.collection("lists")
+
     // Suspend function to update the list name in Firestore
     suspend fun updateListNameInFirestore(newName: String) {
-        collection.document(listName)
-            .update("listName", newName)
-            .await()
+        try {
+            collection.document(listName)
+                .update("listName", newName)
+                .await()
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                e.printStackTrace()
+            }
+        }
     }
+
+    // Suspend function to fetch list items from Firestore
+    suspend fun fetchListItemsFromFirestore(): List<ListItem> {
+        return try {
+            val documentSnapshot = collection.document(listName).get().await()
+            val items = documentSnapshot.getString("items") ?: ""
+            // Split the items string into a list based on some delimiter...? eg, a comma?
+            val itemsList = items.split(",")
+                .filter { it.isNotBlank() }
+                .map { ListItem(it) }
+            itemsList
+        }catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("Firestore", "Error fetching list items: ${e.message}")
+            emptyList()
+        }
+    }
+
     // Create a mutable list of list items
-    var listItems by remember { mutableStateOf(generateListItems()) }
+//    var listItems by remember { mutableStateOf(generateListItems()) }
+
+    var listItems by remember { mutableStateOf(emptyList<ListItem>()) }
+
+    LaunchedEffect(true) {
+        listItems = fetchListItemsFromFirestore()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -135,6 +169,7 @@ fun ListDetailScreen(
         }
     }
 }
+
 @Composable
 fun ListItems(listItems: List<ListItem>) {
     LazyColumn(
@@ -174,13 +209,9 @@ fun ListItems(listItems: List<ListItem>) {
         }
     }
 }
+
 data class ListItem(val text: String)
-fun generateListItems(): List<ListItem> {
-    // Replace this with your logic to fetch items from Firestore or elsewhere
-    return List(10) { index ->
-        ListItem("List Item $index")
-    }
-}
+
 @Composable
 fun CustomIcon(
     icon: ImageVector,

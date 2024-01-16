@@ -41,12 +41,15 @@ import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderF
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
     private val auth: FirebaseAuth = Firebase.auth
+    private val firestore: FirebaseFirestore = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,29 +71,39 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-                    // THIS IS WHERE NAV HOST IS //
-                    // THIS IS WHERE NAV HOST IS //
-                    // THIS IS WHERE NAV HOST IS //
-                    // THIS IS WHERE NAV HOST IS //
+
+                    // THIS IS WHERE NAV HOST IS // THIS IS WHERE NAV HOST IS //
+                    // THIS IS WHERE NAV HOST IS // THIS IS WHERE NAV HOST IS //
+                    // THIS IS WHERE NAV HOST IS // THIS IS WHERE NAV HOST IS //
 
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
+                            Log.d("Navigation", "Navigated to home screen")
                             HomePage(navController = navController)
                         }
+
                         composable("dashboard") {
                             DashboardScreen(navController = navController)
                         }
+
                         composable("registration") {
                             RegistrationScreen(navController = navController)
                         }
+
                         composable("newList") {
                             Surface(
                                 modifier = Modifier.fillMaxSize(),
                                 color = Color.Magenta,
                             ) {
-                                NewListScreen(navController = navController)
+                                CreateListScreen(navController = navController) { newListName ->
+                                    // Log that the onListCreated callback is received
+                                    Log.d("CreateList", "onListCreated callback received with newListName: $newListName")
+
+                                    navController.navigate("listDetail/$newListName")
+                                }
                             }
                         }
+
                         composable("listDetail/{listName}") { backStackEntry ->
                             val listName = backStackEntry.arguments?.getString("listName")
                             // handle nav to listDetail dest using listName
@@ -195,8 +208,13 @@ class MainActivity : ComponentActivity() {
                     if (isCredentialsValid(username, password)) {
                         lifecycleScope.launch {
                             try {
+                                // asynchronous code here... spot?
+//                                Log.d("Coroutine", "Async code executed successfully")
+                                Log.d("Coroutine", "Before executing asynchronous code")
                                 val result =
                                     AuthManager.signInWithEmailAndPassword(username, password)
+                                Log.d("Coroutine", "After executing asynchronous code")
+
                                 if (result.user != null) {
                                     navController.navigate("dashboard")
                                 } else {
