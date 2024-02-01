@@ -37,7 +37,7 @@ fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, Strin
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .background(color = Color.LightGray)
+                .background(color = Color.DarkGray)
         )
 
         // Task Notes input
@@ -47,7 +47,7 @@ fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, Strin
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .background(color = Color.LightGray)
+                .background(color = Color.DarkGray)
         )
 
         // Create Task button

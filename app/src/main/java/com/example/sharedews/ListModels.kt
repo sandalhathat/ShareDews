@@ -1,12 +1,14 @@
 package com.example.sharedews
 import java.util.Date
-// ListModels.kt
-data class MyListItem(
+
+data class ListItem(
     val itemName: String,
-    val quantity: Int,
-    val completed: Boolean)
+    val taskNotes: String
+)
+
 data class MyList(
-    val listItem: String,
-    val createdAt: Date,
-    val items: List<MyListItem>,
-    val owner: String)
+    val listName: String,
+    val owner: String,
+    val createdOn: Date,
+    val items: List<ListItem>
+)

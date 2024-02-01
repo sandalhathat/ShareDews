@@ -71,11 +71,9 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-
                     // THIS IS WHERE NAV HOST IS // THIS IS WHERE NAV HOST IS //
                     // THIS IS WHERE NAV HOST IS // THIS IS WHERE NAV HOST IS //
                     // THIS IS WHERE NAV HOST IS // THIS IS WHERE NAV HOST IS //
-
                     NavHost(navController = navController, startDestination = "home") {
                         composable("home") {
                             Log.d("Navigation", "Navigated to home screen")
@@ -91,30 +89,27 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("newList") {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                color = Color.Magenta,
-                            ) {
+//                            Surface(
+//                                modifier = Modifier.fillMaxSize(),
+//                                color = Color.Magenta,
+//                            ) {
                                 CreateListScreen(navController = navController) { newListName ->
                                     // Log that the onListCreated callback is received
                                     Log.d("CreateList", "onListCreated callback received with newListName: $newListName")
-
                                     navController.navigate("listDetail/$newListName")
-                                }
+                                //}
                             }
                         }
 
                         composable("listDetail/{listName}") { backStackEntry ->
                             val listName = backStackEntry.arguments?.getString("listName")
                             // handle nav to listDetail dest using listName
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                color = Color.Cyan,
-                            ) {
-                                Text(text = "List Detail for $listName")
-                            }
+                            ListDetailScreen(navController, listName ?: "")
                         }
-                    }
+
+                    } // end of nav controller
+
+
 
                     val authStateListener = FirebaseAuth.AuthStateListener { auth ->
                         val currentUser = auth.currentUser
@@ -209,7 +204,6 @@ class MainActivity : ComponentActivity() {
                         lifecycleScope.launch {
                             try {
                                 // asynchronous code here... spot?
-//                                Log.d("Coroutine", "Async code executed successfully")
                                 Log.d("Coroutine", "Before executing asynchronous code")
                                 val result =
                                     AuthManager.signInWithEmailAndPassword(username, password)

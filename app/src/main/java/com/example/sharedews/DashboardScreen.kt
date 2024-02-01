@@ -24,8 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.auth.FirebaseAuth.getInstance
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -66,8 +69,8 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
         LaunchedEffect(Unit) {
             try {
                 val snapshot = collection.get().await()
-//                val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
-                val listNames = snapshot.documents.mapNotNull { it.getString("listItem") }
+                val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
+//                val listNames = snapshot.documents.mapNotNull { it.getString("listItem") }
 
                 Log.d("DashboardScreen", "List names from Firestore: $listNames")
 
@@ -98,7 +101,10 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
                         .fillMaxWidth()
                         .padding(4.dp)
                         .clickable {
-                            navController.navigate("list/$listName")
+                            Log.d("Navigation", "Before navigation: list/$listName")
+//                            navController.navigate("list/$listName")
+                            navController.navigate("listDetail/$listName")
+                            Log.d("Navigation","After navigation")
                         },
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -166,5 +172,13 @@ private fun AccessRestrictedMessage(navController: NavController) {
         ) {
             Text(text = "Go Back")
         }
+    }
+}
+
+@Composable
+@Preview
+fun DashboardScreenPreview() {
+    ShareDewsTheme {
+        val navController = rememberNavController()
     }
 }

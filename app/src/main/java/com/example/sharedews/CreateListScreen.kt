@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -21,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -61,6 +64,7 @@ fun CreateListScreen(navController: NavController, onListCreated: (String) -> Un
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
+                .height(40.dp)
                 .background(color = Color.LightGray)
         )
 
@@ -109,8 +113,9 @@ private fun saveListToFirestore(listName: String, owner: String) {
     val listsCollection = firestore.collection("lists")
 
     val newList = MyList(
-        listItem = listName,
-        createdAt = Date(),
+//        listItem = listName,
+        listName = listName,
+        createdOn = Date(),
         items = emptyList(),
         owner = owner // Add the owner information
     )
@@ -126,4 +131,17 @@ private fun saveListToFirestore(listName: String, owner: String) {
             Log.e("Firestore", "Error creating list $listName", e)
             // handle error, show msg, etc
         }
+}
+
+@Composable
+@Preview
+fun CreateListScreenPreview() {
+    // Mock data for preview
+    var newListName by remember { mutableStateOf(TextFieldValue("Mock List")) }
+
+    // Mock NavController
+    val navController = rememberNavController()
+
+    // Preview the CreateListScreen
+    CreateListScreen(navController = navController, onListCreated = { /* No-op for preview */ })
 }
