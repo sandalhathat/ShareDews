@@ -1,6 +1,5 @@
 package com.example.sharedews
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,20 +35,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.sharedews.FirestoreOperations.fetchTasksFromFirestore
+import com.example.sharedews.FirestoreOperations.updateListNameInFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 @Composable
 fun ListDetailScreen(navController: NavController, listName: String) {
     var newListName by remember { mutableStateOf(listName) }
     var isEditing by remember { mutableStateOf(false) }
-    // Firestore
-    val db = FirebaseFirestore.getInstance()
-    val collection = db.collection("lists")
 
     // state to manage bottom sheet visibility
     var isCreateTaskSheetVisible by remember { mutableStateOf(false) }
@@ -59,44 +55,11 @@ fun ListDetailScreen(navController: NavController, listName: String) {
         isCreateTaskSheetVisible = true
     }
 
-
-
-    // Suspend function to update the list name in Firestore
-    suspend fun updateListNameInFirestore(listName: String, newName: String) {
-        try {
-            val querySnapshot = collection.whereEqualTo("listName", listName).get().await()
-
-            if (!querySnapshot.isEmpty) {
-                val documentSnapshot = querySnapshot.documents.first()
-                documentSnapshot.reference.update("listName", newName).await()
-            } else {
-                // Handle the case where the list with the given name doesn't exist
-                Log.e("Firestore", "List with name $listName not found.")
-            }
-        } catch (e: Exception) {
-            Log.e("Firestore", "Error updating list name: ${e.message}")
-        }
-    }
-
-    // Suspend function to fetch list items from Firestore
-    suspend fun fetchListItemsFromFirestore(): List<ListItem> {
-        return try {
-            val documentSnapshot = collection.document(listName).get().await()
-            val itemsArray = documentSnapshot.get("items") as? List<String>
-            val itemsList = itemsArray?.map { ListItem(it, "") } ?: emptyList()
-            itemsList
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Log.e("Firestore", "Error fetching list items: ${e.message}")
-            emptyList()
-        }
-    }
-
-    // Create a mutable list of list items
-    var listItems by remember { mutableStateOf(emptyList<ListItem>()) }
+    // Create a mutable list of list tasks
+    var tasks by remember { mutableStateOf(emptyList<Task>()) }
 
     LaunchedEffect(true) {
-        listItems = fetchListItemsFromFirestore()
+        tasks = fetchTasksFromFirestore(listName)
     }
 
     Column(
@@ -187,9 +150,8 @@ fun ListDetailScreen(navController: NavController, listName: String) {
         }
 
 
-        // Render the list of items
-        ListItems(listItems)
-
+        // Render the list of tasks
+        TasksList(tasks)
 
         // Button to add a new item
         Button(
@@ -211,7 +173,7 @@ fun ListDetailScreen(navController: NavController, listName: String) {
                 onTaskCreated = { taskName, taskNotes ->
 
                     // add new task to list
-                    listItems = listItems.toMutableList() + ListItem(taskName, taskNotes)
+                    tasks = tasks.toMutableList() + Task(taskName, taskNotes)
 
                     // close bottom sheet
                     isCreateTaskSheetVisible = false
@@ -222,19 +184,19 @@ fun ListDetailScreen(navController: NavController, listName: String) {
 }
 
 @Composable
-fun ListItems(listItems: List<ListItem>) {
-    if (listItems.isEmpty()) {
-        Text(text = "No items available.")
+fun TasksList(tasks: List<Task>) {
+    if (tasks.isEmpty()) {
+        Text(text = "No tasks available.")
     } else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
         ) {
 
-            items(listItems) { item ->
+            items(tasks) { task ->
                 // Destructure the item to access its properties
-                val itemName = item.itemName
-                val itemNotes = item.taskNotes
+                val taskName = task.taskName
+                val taskNotes = task.taskNotes
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -255,11 +217,11 @@ fun ListItems(listItems: List<ListItem>) {
                         Column {
                             Text(
 //                                text = text, // Use the extracted 'text' property
-                                text = itemName,
+                                text = taskName,
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                text = itemNotes,
+                                text = taskNotes,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
