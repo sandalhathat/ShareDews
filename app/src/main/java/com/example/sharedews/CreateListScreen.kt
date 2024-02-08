@@ -50,7 +50,7 @@ fun CreateListScreen(navController: NavController, onListCreated: (String) -> Un
                 navController.popBackStack()
             },
             modifier = Modifier
-                .fillMaxWidth()
+//                .fillMaxWidth()
                 .padding(4.dp)
         ) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -113,7 +113,6 @@ private fun saveListToFirestore(listName: String, owner: String) {
     val listsCollection = firestore.collection("lists")
 
     val newList = MyList(
-//        listItem = listName,
         listName = listName,
         createdOn = Date(),
         items = emptyList(),

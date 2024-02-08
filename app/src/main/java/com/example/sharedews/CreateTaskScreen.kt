@@ -16,8 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, String) -> Unit) {
@@ -28,7 +30,7 @@ fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, Strin
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .background(color = Color.White)
+            .background(color = Color.DarkGray)
     ) {
         // Task Name input
         BasicTextField(
@@ -37,7 +39,7 @@ fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, Strin
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .background(color = Color.DarkGray)
+                .background(color = Color.LightGray)
         )
 
         // Task Notes input
@@ -47,7 +49,7 @@ fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, Strin
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-                .background(color = Color.DarkGray)
+                .background(color = Color.LightGray)
         )
 
         // Create Task button
@@ -64,9 +66,22 @@ fun CreateTaskScreen(navController: NavController, onTaskCreated: (String, Strin
                     // show error message...
                 }
             },
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(8.dp)
         ) {
             Text(text = "Create Task")
         }
     }
+}
+
+@Composable
+@Preview
+fun CreateTaskScreenPreview() {
+    // Create a preview NavController (you can use rememberNavController())
+    val navController = rememberNavController()
+
+    // Create a preview of your composable
+    CreateTaskScreen(navController = navController, onTaskCreated = { taskName, taskNotes ->
+        // This block won't be executed in the preview
+        // You can leave it empty or add some mock data if needed
+    })
 }

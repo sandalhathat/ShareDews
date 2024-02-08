@@ -1,23 +1,17 @@
 package com.example.sharedews
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,11 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.sharedews.FirestoreOperations.fetchTasksFromFirestore
 import com.example.sharedews.FirestoreOperations.updateListNameInFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -46,10 +41,8 @@ import kotlinx.coroutines.withContext
 fun ListDetailScreen(navController: NavController, listName: String) {
     var newListName by remember { mutableStateOf(listName) }
     var isEditing by remember { mutableStateOf(false) }
-
     // state to manage bottom sheet visibility
     var isCreateTaskSheetVisible by remember { mutableStateOf(false) }
-
     // func to open bottom sheet
     fun openCreateTaskSheet() {
         isCreateTaskSheetVisible = true
@@ -85,7 +78,6 @@ fun ListDetailScreen(navController: NavController, listName: String) {
             )
         }
 
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -107,7 +99,8 @@ fun ListDetailScreen(navController: NavController, listName: String) {
                 Text(
                     text = newListName,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier
+                        .padding(4.dp)
                 )
             }
             IconButton(
@@ -149,11 +142,10 @@ fun ListDetailScreen(navController: NavController, listName: String) {
             }
         }
 
-
         // Render the list of tasks
         TasksList(tasks)
 
-        // Button to add a new item
+        // Button to add a new task
         Button(
             onClick = {
                 // open bottom sheet to create new task
@@ -166,15 +158,13 @@ fun ListDetailScreen(navController: NavController, listName: String) {
             Text(text = "Create Task")
         }
 
-        // button sheet to create a new task
+        // bottom sheet to create a new task
         if (isCreateTaskSheetVisible) {
             CreateTaskScreen(
                 navController = navController,
                 onTaskCreated = { taskName, taskNotes ->
-
                     // add new task to list
                     tasks = tasks.toMutableList() + Task(taskName, taskNotes)
-
                     // close bottom sheet
                     isCreateTaskSheetVisible = false
                 }
@@ -184,50 +174,11 @@ fun ListDetailScreen(navController: NavController, listName: String) {
 }
 
 @Composable
-fun TasksList(tasks: List<Task>) {
-    if (tasks.isEmpty()) {
-        Text(text = "No tasks available.")
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+@Preview
+fun ListDetailScreenPreview() {
+    // Create a preview NavController (you can use rememberNavController())
+    val navController = rememberNavController()
 
-            items(tasks) { task ->
-                // Destructure the item to access its properties
-                val taskName = task.taskName
-                val taskNotes = task.taskNotes
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            // Handle item click here
-                        }
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-//                                text = text, // Use the extracted 'text' property
-                                text = taskName,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = taskNotes,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // Create a preview of your composable
+    ListDetailScreen(navController = navController, listName = "Preview List")
 }

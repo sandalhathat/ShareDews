@@ -67,7 +67,8 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
 //                    color = MaterialTheme.colorScheme.background
-                    color = Color.Black,
+//                    color = Color.Black,
+                    color = Color.DarkGray,
                 ) {
                     val navController = rememberNavController()
 
@@ -89,15 +90,10 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable("newList") {
-//                            Surface(
-//                                modifier = Modifier.fillMaxSize(),
-//                                color = Color.Magenta,
-//                            ) {
-                                CreateListScreen(navController = navController) { newListName ->
-                                    // Log that the onListCreated callback is received
-                                    Log.d("CreateList", "onListCreated callback received with newListName: $newListName")
-                                    navController.navigate("listDetail/$newListName")
-                                //}
+                            CreateListScreen(navController = navController) { newListName ->
+                                // Log that the onListCreated callback is received
+                                Log.d("CreateList", "onListCreated callback received with newListName: $newListName")
+                                navController.navigate("listDetail/$newListName")
                             }
                         }
 

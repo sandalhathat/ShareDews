@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,10 +29,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.sharedews.FirestoreOperations.deleteListFromFirestore
 import com.example.sharedews.ui.theme.ShareDewsTheme
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.getInstance
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @Composable
@@ -53,7 +57,8 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+//            .padding(16.dp),
+            .padding(4.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -70,7 +75,6 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
             try {
                 val snapshot = collection.get().await()
                 val listNames = snapshot.documents.mapNotNull { it.getString("listName") }
-//                val listNames = snapshot.documents.mapNotNull { it.getString("listItem") }
 
                 Log.d("DashboardScreen", "List names from Firestore: $listNames")
 
@@ -95,20 +99,7 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
                 .background(color = Color.LightGray)
         ) {
             for (listName in lists) {
-                Text(
-                    text = listName,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                        .clickable {
-                            Log.d("Navigation", "Before navigation: list/$listName")
-//                            navController.navigate("list/$listName")
-                            navController.navigate("listDetail/$listName")
-                            Log.d("Navigation","After navigation")
-                        },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                DashboardListItem(navController, listName)
             }
         }
 
@@ -156,22 +147,47 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
 }
 
 @Composable
-private fun AccessRestrictedMessage(navController: NavController) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun DashboardListItem(navController: NavController, listName: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
     ) {
-        Text(text = "Dashboard Access Restricted")
-        Text(text = "Please log in and verify your email to access the dashboard.")
-        Button(
-            onClick = {
-                // Navigate back to the login or registration screen
-                navController.navigate("home")
+        // Display list name
+        Text(
+            text = listName,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+                .clickable {
+                    Log.d("Navigation", "Before navigation: list/$listName")
+                    navController.navigate("listDetail/$listName")
+                    Log.d("Navigation", "After navigation")
+                },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // Button to delete the list
+        DeleteListButton(navController, listName)
+    }
+}
+
+@Composable
+fun DeleteListButton(navController: NavController, listName: String) {
+    val coroutineScope = rememberCoroutineScope()
+
+    // Button to delete the list
+    Button(
+        onClick = {
+            coroutineScope.launch {
+                deleteListFromFirestore(listName)
+                // You might want to refresh the UI or perform other actions after deletion
             }
-        ) {
-            Text(text = "Go Back")
-        }
+        },
+        modifier = Modifier.padding(4.dp)
+    ) {
+        Text(text = "Delete")
     }
 }
 
@@ -180,5 +196,9 @@ private fun AccessRestrictedMessage(navController: NavController) {
 fun DashboardScreenPreview() {
     ShareDewsTheme {
         val navController = rememberNavController()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            DashboardContent(navController, currentUser)
+        }
     }
 }

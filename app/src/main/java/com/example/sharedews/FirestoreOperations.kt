@@ -35,7 +35,8 @@ object FirestoreOperations {
     suspend fun fetchTasksFromFirestore(listName: String): List<Task> {
         return try {
             val documentSnapshot = collection.document(listName).get().await()
-            val tasksArray = documentSnapshot.get("tasks") as? List<String>
+            // val tasksArray = documentSnapshot.get("tasks") as? List<String>
+            val tasksArray = documentSnapshot.get("items") as? List<String>
             val tasksList = tasksArray?.map { Task(it, "") } ?: emptyList()
             tasksList
         } catch (e: Exception) {
@@ -44,4 +45,23 @@ object FirestoreOperations {
             emptyList()
         }
     }
+
+
+    // suspend function to delete a list from firestore
+    suspend fun deleteListFromFirestore(listName: String) {
+        try {
+            val querySnapshot = collection.whereEqualTo("listName", listName).get().await()
+            if (!querySnapshot.isEmpty) {
+                val documentSnapshot = querySnapshot.documents.first()
+                documentSnapshot.reference.delete().await()
+            } else {
+                // Handle the case where the list with the given name doesn't exist
+                Log.e("Firestore", "List with name $listName not found.")
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error deleting list: ${e.message}")
+        }
+    }
+
+
 }
