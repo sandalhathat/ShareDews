@@ -50,6 +50,10 @@ fun DashboardScreen(navController: NavController) {
         // User is not logged in or email is not verified, display a message
         AccessRestrictedMessage(navController)
     }
+
+
+
+
 }
 
 @Composable
@@ -99,7 +103,10 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
                 .background(color = Color.LightGray)
         ) {
             for (listName in lists) {
-                DashboardListItem(navController, listName)
+                DashboardListItem(navController, listName, onListDeleted = {
+                    // updated the lists after a list is deleted
+                    lists = lists.filter { name -> name != it }
+                })
             }
         }
 
@@ -147,17 +154,19 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
 }
 
 @Composable
-private fun DashboardListItem(navController: NavController, listName: String) {
+private fun DashboardListItem(navController: NavController, listName: String, onListDeleted: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)
+//            .background(color = Color.LightGray)
     ) {
         // Display list name
         Text(
             text = listName,
             modifier = Modifier
-                .fillMaxWidth()
+//                .fillMaxWidth()
+                .weight(1f)
                 .padding(4.dp)
                 .clickable {
                     Log.d("Navigation", "Before navigation: list/$listName")
@@ -169,12 +178,14 @@ private fun DashboardListItem(navController: NavController, listName: String) {
         )
 
         // Button to delete the list
-        DeleteListButton(navController, listName)
+        DeleteListButton(navController, listName) {
+            onListDeleted(listName)
+        }
     }
 }
 
 @Composable
-fun DeleteListButton(navController: NavController, listName: String) {
+fun DeleteListButton(navController: NavController, listName: String, onListDeleted: () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
 
     // Button to delete the list
@@ -183,6 +194,7 @@ fun DeleteListButton(navController: NavController, listName: String) {
             coroutineScope.launch {
                 deleteListFromFirestore(listName)
                 // You might want to refresh the UI or perform other actions after deletion
+                onListDeleted()
             }
         },
         modifier = Modifier.padding(4.dp)
