@@ -1,5 +1,6 @@
 package com.example.sharedews
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,42 +27,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOperations.fetchTasksFromFirestore
-import com.example.sharedews.FirestoreOperations.updateListNameInFirestore
+import com.example.sharedews.FirestoreOps.updateListNameInFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun ListDetailScreen(navController: NavController, listName: String) {
+fun ListDetailScreen(navController: NavController, listName: String, listDocumentId: String) {
     var newListName by remember { mutableStateOf(listName) }
     var isEditing by remember { mutableStateOf(false) }
-    // state to manage bottom sheet visibility
     var isCreateTaskSheetVisible by remember { mutableStateOf(false) }
-    // func to open bottom sheet
-    fun openCreateTaskSheet() {
-        isCreateTaskSheetVisible = true
-    }
-
-    // Create a mutable list of list tasks
+    val taskViewModel: TaskViewModel = viewModel()
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
 
-    LaunchedEffect(true) {
-        tasks = fetchTasksFromFirestore(listName)
+    LaunchedEffect(listDocumentId) {
+        if (listDocumentId != null) {
+            tasks = FirestoreOps.fetchTasksFromFirestore(listDocumentId)
+            Log.d("ListDetailScreen", "Fetched tasks: $tasks")
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .background(color = Color.DarkGray)
+//            .background(color = Color.DarkGray)
     ) {
 
+        // back button
         // back button
         IconButton(
             onClick = {
@@ -74,7 +74,9 @@ fun ListDetailScreen(navController: NavController, listName: String) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+//                tint = MaterialTheme.colorScheme.primary //TODO: take a look at this later to make sure primary isn't hiding things.
+//                tint = MaterialTheme.colorScheme.background
+
             )
         }
 
@@ -103,6 +105,9 @@ fun ListDetailScreen(navController: NavController, listName: String) {
                         .padding(4.dp)
                 )
             }
+
+            // edit button?
+            // edit button?
             IconButton(
                 onClick = {
                     if (isEditing) {
@@ -124,7 +129,7 @@ fun ListDetailScreen(navController: NavController, listName: String) {
                 },
                 modifier = Modifier
                     .padding(4.dp)
-                    .background(color = Color.DarkGray)
+//                    .background(color = Color.DarkGray)
             ) {
                 if (isEditing) {
                     Icon(
@@ -143,13 +148,18 @@ fun ListDetailScreen(navController: NavController, listName: String) {
         }
 
         // Render the list of tasks
-        TasksList(tasks)
+        // Render the list of tasks
+        TasksList(tasks ?: emptyList())
+        Log.d("ListDetailScreen", "Rendering tasks: $tasks")
 
+
+
+        // Button to add a new task
         // Button to add a new task
         Button(
             onClick = {
                 // open bottom sheet to create new task
-                openCreateTaskSheet()
+                isCreateTaskSheetVisible = true
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -162,9 +172,12 @@ fun ListDetailScreen(navController: NavController, listName: String) {
         if (isCreateTaskSheetVisible) {
             CreateTaskScreen(
                 navController = navController,
+                listDocumentId = listDocumentId, // Pass the listDocumentId parameter
+                lifecycleOwner = LocalLifecycleOwner.current,
                 onTaskCreated = { taskName, taskNotes ->
                     // add new task to list
-                    tasks = tasks.toMutableList() + Task(taskName, taskNotes)
+//                    tasks = tasks.toMutableList() + Task(taskName, taskNotes)
+                    taskViewModel.setTasks(tasks.orEmpty() + Task(taskName, taskNotes))
                     // close bottom sheet
                     isCreateTaskSheetVisible = false
                 }
@@ -173,6 +186,7 @@ fun ListDetailScreen(navController: NavController, listName: String) {
     }
 }
 
+
 @Composable
 @Preview
 fun ListDetailScreenPreview() {
@@ -180,5 +194,8 @@ fun ListDetailScreenPreview() {
     val navController = rememberNavController()
 
     // Create a preview of your composable
-    ListDetailScreen(navController = navController, listName = "Preview List")
+    ListDetailScreen(navController = navController, listName = "Preview List,\nPreview List,\n" +
+            "Preview List,\n" +
+            "Preview List,\n" +
+            "Preview List", listDocumentId = "previewListId")
 }

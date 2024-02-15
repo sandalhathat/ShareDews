@@ -1,7 +1,6 @@
 package com.example.sharedews
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,14 +21,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOperations.deleteListFromFirestore
+import com.example.sharedews.FirestoreOps.deleteListFromFirestore
 import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.getInstance
@@ -42,7 +40,6 @@ import kotlinx.coroutines.tasks.await
 fun DashboardScreen(navController: NavController) {
     val mAuth = getInstance()
     val currentUser = mAuth.currentUser
-
     if (currentUser != null && currentUser.isEmailVerified) {
         // User is logged in and email is verified, display dashboard content
         DashboardContent(navController, currentUser)
@@ -50,10 +47,6 @@ fun DashboardScreen(navController: NavController) {
         // User is not logged in or email is not verified, display a message
         AccessRestrictedMessage(navController)
     }
-
-
-
-
 }
 
 @Composable
@@ -61,7 +54,6 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
     Column(
         modifier = Modifier
             .fillMaxSize()
-//            .padding(16.dp),
             .padding(4.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -90,6 +82,7 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
         }
 
         // Display lists
+        // Display lists
         Text(
             text = "Your Lists:",
             style = MaterialTheme.typography.bodyLarge,
@@ -100,7 +93,7 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .background(color = Color.LightGray)
+//                .background(color = Color.LightGray)
         ) {
             for (listName in lists) {
                 DashboardListItem(navController, listName, onListDeleted = {
@@ -110,6 +103,7 @@ private fun DashboardContent(navController: NavController, currentUser: Firebase
             }
         }
 
+        // Create a new list
         // Create a new list
         Row(
             modifier = Modifier
@@ -169,9 +163,7 @@ private fun DashboardListItem(navController: NavController, listName: String, on
                 .weight(1f)
                 .padding(4.dp)
                 .clickable {
-                    Log.d("Navigation", "Before navigation: list/$listName")
                     navController.navigate("listDetail/$listName")
-                    Log.d("Navigation", "After navigation")
                 },
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

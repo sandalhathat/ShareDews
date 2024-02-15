@@ -1,7 +1,6 @@
 package com.example.sharedews
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,14 +30,15 @@ import com.google.firebase.ktx.Firebase
 import java.util.Date
 
 @Composable
-fun CreateListScreen(navController: NavController, onListCreated: (String) -> Unit) {
+fun CreateListScreen(navController: NavController,
+                     onListCreated: (String) -> Unit) {
     var newListName by remember { mutableStateOf(TextFieldValue()) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .background(color = Color.White)
+//            .background(color = Color.White)
     ) {
 
 
@@ -65,7 +64,7 @@ fun CreateListScreen(navController: NavController, onListCreated: (String) -> Un
                 .fillMaxWidth()
                 .padding(4.dp)
                 .height(40.dp)
-                .background(color = Color.LightGray)
+//                .background(color = Color.LightGray)
         )
 
 
@@ -84,7 +83,10 @@ fun CreateListScreen(navController: NavController, onListCreated: (String) -> Un
                     Log.d("CreatedList", "Creating list with name: ${newListName.text} by $owner")
 
                     // Save the new list to Firestore
-                    saveListToFirestore(newListName.text, owner)
+                    saveListToFirestore(newListName.text, owner) {
+                        listName, documentId ->
+                        onListCreated(listName)
+
 
                     // Notify the caller that a new list is created
                     onListCreated(newListName.text)
@@ -94,6 +96,7 @@ fun CreateListScreen(navController: NavController, onListCreated: (String) -> Un
 
                     // Navigate back
                     navController.popBackStack()
+                    }
                 } else {
                     // handle case where list name is blank...
                     // show error message...
@@ -106,31 +109,33 @@ fun CreateListScreen(navController: NavController, onListCreated: (String) -> Un
     }
 }
 
-//  func to save new list to Firestore
-private fun saveListToFirestore(listName: String, owner: String) {
+private fun saveListToFirestore(listName: String, owner: String, callback: (String, String) -> Unit) {
     val firestore = Firebase.firestore
-    // assuming you have a "lists" collection... O_o??
     val listsCollection = firestore.collection("lists")
+    val documentId = listsCollection.document().id
 
     val newList = MyList(
         listName = listName,
         createdOn = Date(),
-        items = emptyList(),
+        tasks = emptyList(), // using tasks, now...
         owner = owner // Add the owner information
     )
 
-    // Create a new document with the list name as the document ID
-    listsCollection.document(listName)
-//        .set(mapOf("name" to listName))
+    // Set the data using the generated document ID
+    listsCollection.document(documentId)
         .set(newList)
         .addOnSuccessListener {
-            Log.d("Firestore", "List $listName created successfully by $owner")
+            Log.d("Firestore", "List $listName created successfully by $owner with document ID: $documentId")
+
+            // Call the callback with the list name and document ID
+            callback(listName, documentId)
         }
         .addOnFailureListener { e ->
             Log.e("Firestore", "Error creating list $listName", e)
             // handle error, show msg, etc
         }
 }
+
 
 @Composable
 @Preview

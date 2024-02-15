@@ -1,5 +1,6 @@
 package com.example.sharedews
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,8 @@ import com.example.sharedews.ui.theme.ShareDewsTheme
 
 @Composable
 fun TasksList(tasks: List<Task>) {
+    // Add a log statement to check the tasks received
+    Log.d("TasksList", "Received tasks: $tasks")
     if (tasks.isEmpty()) {
         Text(text = "No tasks available.")
     } else {
@@ -33,7 +36,7 @@ fun TasksList(tasks: List<Task>) {
         ) {
 
             items(tasks) { task ->
-                // Destructure the item to access its properties
+                // De-structure the item to access its properties
                 val taskName = task.taskName
                 val taskNotes = task.taskNotes
                 Column(

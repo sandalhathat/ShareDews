@@ -3,14 +3,15 @@ import java.util.Date
 
 data class Task(
     val taskName: String,
-    val taskNotes: String
+    val taskNotes: String,
+    val completed: Boolean = (false)
 )
 
 data class MyList(
     val listName: String,
     val owner: String,
     val createdOn: Date,
-    val items: List<Task>
+    val tasks: List<Task>
 )
 
 data class UserData(

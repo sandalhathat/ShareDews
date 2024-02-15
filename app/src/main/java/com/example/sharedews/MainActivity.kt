@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -66,9 +65,8 @@ class MainActivity : ComponentActivity() {
             ShareDewsTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colorScheme.background
-//                    color = Color.Black,
-                    color = Color.DarkGray,
+//                    color = Color.DarkGray,
+//                    color = Color.LightGray,
                 ) {
                     val navController = rememberNavController()
 
@@ -99,12 +97,21 @@ class MainActivity : ComponentActivity() {
 
                         composable("listDetail/{listName}") { backStackEntry ->
                             val listName = backStackEntry.arguments?.getString("listName")
-                            // handle nav to listDetail dest using listName
-                            ListDetailScreen(navController, listName ?: "")
+                            var listDocumentId by remember { mutableStateOf<String?>(null) }
+                            LaunchedEffect(listName) {
+
+                                // Pass the listDocumentId parameter
+                                listDocumentId = listName?.let { FirestoreOps.fetchListDocumentIdFromFirestore(it) }
+                            }
+                            // handle nav to listDetail dest using listName and listDocumentId
+                            // not sure why this was given the ?: "" to cover null since it will never be null in this case...
+                            ListDetailScreen(navController, listName ?: "", listDocumentId ?: "")
+                            Log.d("SelectList", "testing selection of list to print $listDocumentId")
                         }
 
-                    } // end of nav controller
-
+                    }
+                    // end of nav controller
+                    // end of nav controller
 
 
                     val authStateListener = FirebaseAuth.AuthStateListener { auth ->
@@ -112,7 +119,7 @@ class MainActivity : ComponentActivity() {
                         val isEmailVerified = currentUser?.isEmailVerified == true
 
                         if (currentUser != null && isEmailVerified) {
-                            navController.navigate("dashboard")
+//                            navController.navigate("dashboard")
                         }
                     }
                     auth.addAuthStateListener(authStateListener)
@@ -121,7 +128,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun isCredentialsValid(username: String, password: String): Boolean {
+    private fun isCredentialsValid(username: String, password: String): Boolean {
         return username.isNotBlank() && password.length >= 6
     }
 
@@ -149,7 +156,8 @@ class MainActivity : ComponentActivity() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "Shared Todo List",
-                color = Color.Green,)
+//                color = Color.Green,
+                )
 
             Spacer(modifier = Modifier.height(16.dp))
 
