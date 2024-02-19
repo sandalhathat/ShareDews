@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +25,13 @@ import androidx.compose.ui.unit.dp
 import com.example.sharedews.ui.theme.ShareDewsTheme
 
 @Composable
-fun TasksList(tasks: List<Task>) {
+fun TasksList(
+    tasks: List<Task>,
+    onDeleteTask: (String) -> Unit,
+    onCompleteTask: (String) -> Unit,
+    onEditTask: (String, String, String) -> Unit,
+    onTaskClick: (String, String) -> Unit
+) {
     // Add a log statement to check the tasks received
     Log.d("TasksList", "Received tasks: $tasks")
     if (tasks.isEmpty()) {
@@ -42,13 +49,16 @@ fun TasksList(tasks: List<Task>) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            // Handle item click here
-                        }
                         .padding(16.dp)
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onTaskClick(taskName, taskNotes)
+                            }
+                            .padding(16.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
@@ -58,7 +68,6 @@ fun TasksList(tasks: List<Task>) {
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-//                                text = text, // Use the extracted 'text' property
                                 text = taskName,
                                 style = MaterialTheme.typography.bodySmall
                             )
@@ -67,12 +76,24 @@ fun TasksList(tasks: List<Task>) {
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
+
+                        // Add an Edit button/icon
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable {
+                                // Handle the edit action
+                                onEditTask(taskName, "", "")
+                            }
+                        )
                     }
                 }
             }
         }
     }
 }
+
 
 @Preview
 @Composable
@@ -84,6 +105,13 @@ fun TasksListPreview() {
     )
 
     ShareDewsTheme {
-        TasksList(tasks = sampleTasks)
+        TasksList(
+            tasks = sampleTasks,
+            onDeleteTask = { taskName -> /* Implement onDeleteTask logic */ },
+            onCompleteTask = { taskName -> /* Implement onCompleteTask logic */ },
+            onEditTask = { taskName, newTaskName, newTaskNotes -> /* Implement onEditTask logic */ },
+            onTaskClick = { taskName, taskNotes -> /* Implement onTaskClick logic */ }
+        )
     }
 }
+

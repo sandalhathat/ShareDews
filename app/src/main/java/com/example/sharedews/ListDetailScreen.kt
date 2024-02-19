@@ -46,6 +46,7 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
     var isCreateTaskSheetVisible by remember { mutableStateOf(false) }
     val taskViewModel: TaskViewModel = viewModel()
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
+    var selectedTask: Task? by remember {mutableStateOf(null)}
 
     LaunchedEffect(listDocumentId) {
         if (listDocumentId != null) {
@@ -147,11 +148,69 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
             }
         }
 
-        // Render the list of tasks
-        // Render the list of tasks
-        TasksList(tasks ?: emptyList())
-        Log.d("ListDetailScreen", "Rendering tasks: $tasks")
+        // function to delete a task
+        fun deleteTask(taskName: String) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    FirestoreOps.deleteTask(listDocumentId, taskName)
+                    // update the tasks list after deletion
+                    tasks = tasks.filter { it.taskName != taskName }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
 
+        // function to complete a task
+        fun completeTask(taskName: String) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    FirestoreOps.completeTask(listDocumentId, taskName)
+                    // update the tasks list after completion
+                    tasks = tasks.map{ if (it.taskName == taskName) it.copy(completed = true) else it }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+        // function to edit a task
+        fun editTask(taskName: String, newTaskName: String, newTaskNotes: String) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    FirestoreOps.editTask(listDocumentId, taskName, newTaskName, newTaskNotes)
+                    // update the tasks list after editing
+                    tasks = tasks.map { if (it.taskName == taskName) it.copy(taskName = newTaskName, taskNotes = newTaskNotes) else it }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+
+        // Render the list of tasks
+        // call function from taskslist composable where you render the list of tasks
+        TasksList(
+            tasks ?: emptyList(),
+            onDeleteTask = { taskName: String ->
+                deleteTask(taskName)
+            },
+            onCompleteTask = { taskName: String ->
+                completeTask(taskName)
+            },
+            onEditTask = { taskName: String, newTaskName: String, newTaskNotes: String ->
+                editTask(taskName, newTaskName, newTaskNotes)
+            },
+            onTaskClick = { taskName: String, taskNotes: String ->
+                // Handle task click here, you can navigate to TaskDetailScreen or perform other actions
+                selectedTask = Task(taskName, taskNotes)
+                // Example: Navigate to TaskDetailScreen
+//                navController.navigate("taskDetail/${selectedTask?.taskName}/${selectedTask?.taskNotes}")
+                navController.navigate("taskDetail/$listDocumentId/$taskName")
+            }
+        )
+
+        Log.d("ListDetailScreen", "Rendering tasks: $tasks")
 
 
         // Button to add a new task
