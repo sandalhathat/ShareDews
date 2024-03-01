@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -6,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
@@ -38,12 +37,12 @@ fun TaskDetailScreen(
     navController: NavController,
     listDocumentId: String,
     taskName: String,
-    taskNotes: String,
+    taskNotes: String? = null,
     onEditTask: (String, String, String) -> Unit
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var editedTaskName by remember { mutableStateOf(taskName) }
-    var editedTaskNotes by remember { mutableStateOf(taskNotes) }
+    var editedTaskNotes by remember { mutableStateOf(taskNotes.orEmpty()) }
 
     Column(
         modifier = Modifier
@@ -60,17 +59,19 @@ fun TaskDetailScreen(
                 .background(color = Color.Magenta)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null,
             )
         }
 
         // Display task notes
-        Text(
-            text = "Task Notes: $taskNotes",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(4.dp)
-        )
+        taskNotes?.let {
+            Text(
+                text = "Task Notes: $it",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
 
         // Box for edit button
         Box(
@@ -142,14 +143,21 @@ fun TaskDetailScreenPreview() {
     val taskName = "sample derp"
     val taskNotes = "sample mcderp, mow lawn, shave derp, " +
             "eat derp, derpy derp"
-    val onEditTask: (String, String, String) -> Unit = { _, _, _ -> /* Implement the onEditTask logic here */ }
+    val onEditTask: (String, String, String) -> Unit =
+        { _, _, _ -> /* Implement the onEditTask logic here */ }
 
     // Create the preview
     ShareDewsTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            TaskDetailScreen(navController = navController, taskName = taskName, taskNotes = taskNotes, listDocumentId = "derpyList", onEditTask = onEditTask)
+            TaskDetailScreen(
+                navController = navController,
+                taskName = taskName,
+                taskNotes = taskNotes,
+                listDocumentId = "derpyList",
+                onEditTask = onEditTask
+            )
         }
     }
 }

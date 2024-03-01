@@ -13,4 +13,17 @@ class TaskViewModel : ViewModel() {
         Log.d("TaskViewModel", "Set tasks: $newTasks")
     }
 
+
+    suspend fun fetchTasks(listDocumentId: String) {
+        try {
+            val fetchedTasks = FirestoreOps.fetchTasksFromFirestore(listDocumentId)
+            _tasks.value = fetchedTasks
+        } catch (e: Exception) {
+            Log.e("TaskViewModel", "Error fetching tasks: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+
+
 }

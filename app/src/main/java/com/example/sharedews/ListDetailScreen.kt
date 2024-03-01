@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.sharedews.FirestoreOps.completeTask
+import com.example.sharedews.FirestoreOps.deleteTask
+import com.example.sharedews.FirestoreOps.editTask
 import com.example.sharedews.FirestoreOps.updateListNameInFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,21 +49,21 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
     var isEditing by remember { mutableStateOf(false) }
     var isCreateTaskSheetVisible by remember { mutableStateOf(false) }
     val taskViewModel: TaskViewModel = viewModel()
-    var tasks by remember { mutableStateOf(emptyList<Task>()) }
-    var selectedTask: Task? by remember {mutableStateOf(null)}
+    val tasks by taskViewModel.tasks.observeAsState()
+    var selectedTask: Task? by remember { mutableStateOf(null) }
 
-    LaunchedEffect(listDocumentId) {
-        if (listDocumentId != null) {
-            tasks = FirestoreOps.fetchTasksFromFirestore(listDocumentId)
-            Log.d("ListDetailScreen", "Fetched tasks: $tasks")
+    if (listDocumentId.isNotEmpty()) {
+        LaunchedEffect(listDocumentId) {
+            taskViewModel.fetchTasks(listDocumentId)
         }
     }
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-//            .background(color = Color.DarkGray)
+//            .background(color = Color.LightGray)
     ) {
 
         // back button
@@ -75,9 +79,6 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
-//                tint = MaterialTheme.colorScheme.primary //TODO: take a look at this later to make sure primary isn't hiding things.
-//                tint = MaterialTheme.colorScheme.background
-
             )
         }
 
@@ -97,6 +98,7 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                     modifier = Modifier
                         .weight(1f)
                         .padding(4.dp)
+                        .background(color = Color.LightGray)
                 )
             } else {
                 Text(
@@ -116,11 +118,18 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                         val finalNewListName = newListName // create a final var?
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
-                                updateListNameInFirestore(listName, newListName)
+
+                                updateListNameInFirestore(listDocumentId, finalNewListName)
+//                                updateListNameInFirestore(listName, finalNewListName)
                                 withContext(Dispatchers.Main) {
                                     isEditing = false
+                                    Log.d(
+                                        "ListDetailScreen",
+                                        "List name updated successfully to: $finalNewListName"
+                                    )
                                 }
                             } catch (e: Exception) {
+                                Log.e("ListDetailScreen", "Error updating list name: ${e.message}")
                                 e.printStackTrace()
                             }
                         }
@@ -130,7 +139,6 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                 },
                 modifier = Modifier
                     .padding(4.dp)
-//                    .background(color = Color.DarkGray)
             ) {
                 if (isEditing) {
                     Icon(
@@ -148,68 +156,31 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
             }
         }
 
-        // function to delete a task
-        fun deleteTask(taskName: String) {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    FirestoreOps.deleteTask(listDocumentId, taskName)
-                    // update the tasks list after deletion
-                    tasks = tasks.filter { it.taskName != taskName }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        // function to complete a task
-        fun completeTask(taskName: String) {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    FirestoreOps.completeTask(listDocumentId, taskName)
-                    // update the tasks list after completion
-                    tasks = tasks.map{ if (it.taskName == taskName) it.copy(completed = true) else it }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        // function to edit a task
-        fun editTask(taskName: String, newTaskName: String, newTaskNotes: String) {
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    FirestoreOps.editTask(listDocumentId, taskName, newTaskName, newTaskNotes)
-                    // update the tasks list after editing
-                    tasks = tasks.map { if (it.taskName == taskName) it.copy(taskName = newTaskName, taskNotes = newTaskNotes) else it }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-
         // Render the list of tasks
         // call function from taskslist composable where you render the list of tasks
         TasksList(
             tasks ?: emptyList(),
             onDeleteTask = { taskName: String ->
-                deleteTask(taskName)
+                CoroutineScope(Dispatchers.IO).launch { deleteTask(listDocumentId, taskName) }
             },
             onCompleteTask = { taskName: String ->
-                completeTask(taskName)
+                CoroutineScope(Dispatchers.IO).launch { completeTask(listDocumentId, taskName) }
             },
             onEditTask = { taskName: String, newTaskName: String, newTaskNotes: String ->
-                editTask(taskName, newTaskName, newTaskNotes)
+                CoroutineScope(Dispatchers.IO).launch {
+                    editTask(listDocumentId, taskName, newTaskName, newTaskNotes)
+                }
             },
             onTaskClick = { taskName: String, taskNotes: String ->
-                // Handle task click here, you can navigate to TaskDetailScreen or perform other actions
-                selectedTask = Task(taskName, taskNotes)
-                // Example: Navigate to TaskDetailScreen
-//                navController.navigate("taskDetail/${selectedTask?.taskName}/${selectedTask?.taskNotes}")
+                selectedTask =
+                    Task(
+                        taskName = taskName,
+                        taskNotes = taskNotes,
+                        listDocumentId = listDocumentId
+                    )
                 navController.navigate("taskDetail/$listDocumentId/$taskName")
             }
         )
-
         Log.d("ListDetailScreen", "Rendering tasks: $tasks")
 
 
@@ -235,8 +206,14 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                 lifecycleOwner = LocalLifecycleOwner.current,
                 onTaskCreated = { taskName, taskNotes ->
                     // add new task to list
-//                    tasks = tasks.toMutableList() + Task(taskName, taskNotes)
-                    taskViewModel.setTasks(tasks.orEmpty() + Task(taskName, taskNotes))
+                    taskViewModel.setTasks(
+                        tasks.orEmpty() + Task(
+                            taskName,
+                            taskNotes,
+                            false,
+                            listDocumentId
+                        )
+                    )
                     // close bottom sheet
                     isCreateTaskSheetVisible = false
                 }
@@ -252,9 +229,13 @@ fun ListDetailScreenPreview() {
     // Create a preview NavController (you can use rememberNavController())
     val navController = rememberNavController()
 
+    // Log the listDocumentId to check its value during preview
+    Log.d("ListDetailScreenPreview", "listDocumentId: YourListDocumentId")
     // Create a preview of your composable
-    ListDetailScreen(navController = navController, listName = "Preview List,\nPreview List,\n" +
-            "Preview List,\n" +
-            "Preview List,\n" +
-            "Preview List", listDocumentId = "previewListId")
+    ListDetailScreen(
+        navController = navController, listName = "Preview List,\nPreview List,\n" +
+                "Preview List,\n" +
+                "Preview List,\n" +
+                "Preview List", listDocumentId = "previewListId"
+    )
 }

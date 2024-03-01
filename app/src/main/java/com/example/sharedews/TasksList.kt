@@ -43,9 +43,13 @@ fun TasksList(
         ) {
 
             items(tasks) { task ->
+                Log.d("TasksList", "Iterating through task: $task")
                 // De-structure the item to access its properties
                 val taskName = task.taskName
                 val taskNotes = task.taskNotes
+                // Log statement to check iteration through tasks
+                Log.d("TasksList", "Iterating through task: $taskName, $taskNotes")
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -56,7 +60,10 @@ fun TasksList(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                onTaskClick(taskName, taskNotes)
+                                // Log statement to check if onTaskClick is invoked
+                                Log.d("TasksList", "Clicked on task: $taskName, $taskNotes")
+//                                onTaskClick(taskName, taskNotes)
+                                onTaskClick(task.listDocumentId, task.taskName)
                             }
                             .padding(16.dp)
                     ) {
@@ -94,14 +101,13 @@ fun TasksList(
     }
 }
 
-
 @Preview
 @Composable
 fun TasksListPreview() {
     val sampleTasks = listOf(
-        Task("Task 1", "Description 1"),
-        Task("Task 2", "Description 2"),
-        Task("Task 3", "Description 3")
+        Task("Task 1", "Description 1", false, "yourListDocumentId"),
+        Task("Task 2", "Description 2", false, "yourListDocumentId"),
+        Task("Task 3", "Description 3", false, "yourListDocumentId")
     )
 
     ShareDewsTheme {
@@ -114,4 +120,5 @@ fun TasksListPreview() {
         )
     }
 }
+
 

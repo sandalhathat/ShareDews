@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.navigation.NavHostController
+import com.example.sharedews.AuthManager.areCredentialsValid
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -100,7 +101,7 @@ fun HomePage(navController: NavHostController, snackbarHostState: SnackbarHostSt
 
         Button(
             onClick = {
-                if (isCredentialsValid(username, password)) {
+                if (areCredentialsValid(username, password)) {
                     lifecycleScope.launch {
                         try {
                             Log.d("Coroutine", "Before executing asynchronous code")

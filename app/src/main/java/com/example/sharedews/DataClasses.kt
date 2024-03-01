@@ -4,7 +4,8 @@ import java.util.Date
 data class Task(
     val taskName: String,
     val taskNotes: String,
-    val completed: Boolean = (false)
+    val completed: Boolean = false,
+    val listDocumentId: String,
 )
 
 data class MyList(

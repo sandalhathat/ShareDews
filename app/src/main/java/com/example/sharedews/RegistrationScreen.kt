@@ -20,9 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.sharedews.FirestoreOps.addUserDataToDatabase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -83,12 +83,19 @@ fun RegistrationScreen(navController: NavController) {
 
         Button(
             onClick = {
-                handleRegistration(email, password, passwordConfirmation, scope, navController) { result ->
+                handleRegistration(
+                    email,
+                    password,
+                    passwordConfirmation,
+                    scope,
+                    navController
+                ) { result ->
                     when (result) {
                         is RegistrationResult.Success -> {
                             // Registration successful, navigate to the dashboard
                             navController.navigate("dashboard")
                         }
+
                         is RegistrationResult.Failure -> {
                             // Registration failed, handle the error
                             errorMessage = result.error
@@ -120,7 +127,7 @@ fun handleRegistration(
     resultCallback: (RegistrationResult) -> Unit
 ) {
     scope.launch {
-        if (isCredentialsValid(email, password) && password == passwordConfirmation) {
+        if (AuthManager.areCredentialsValid(email, password) && password == passwordConfirmation) {
             try {
                 val auth = Firebase.auth
                 val authResult = auth.createUserWithEmailAndPassword(email, password).await()
@@ -143,29 +150,5 @@ fun handleRegistration(
         } else {
             resultCallback(RegistrationResult.Failure("Invalid credentials or password mismatch"))
         }
-    }
-}
-
-fun isCredentialsValid(email: String, password: String): Boolean {
-    return email.isNotBlank() && password.length >= 6
-}
-
-fun addUserDataToDatabase(user: FirebaseUser, userData: UserData) {
-    val db = Firebase.firestore
-
-    // check if user email is verified
-    if (user.isEmailVerified) {
-        // add data to database
-        db.collection("users")
-            .document(user.uid)
-            .set(userData)
-            .addOnSuccessListener {
-                // data added successfully
-            }
-            .addOnFailureListener { e ->
-                // handle the error
-            }
-    } else {
-        // handle case where user email is not verified
     }
 }

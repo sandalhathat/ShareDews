@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.sharedews.FirestoreOps.fetchListDocumentIdFromFirestore
 import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.ktx.appCheck
@@ -34,7 +35,6 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 
 class MainActivity : ComponentActivity() {
@@ -69,8 +69,7 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     snackbarHost = { SnackbarHost(snackbarHostState) },
-                    content = {
-                            padding ->
+                    content = { padding ->
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -115,7 +114,7 @@ class MainActivity : ComponentActivity() {
                                     LaunchedEffect(listName) {
                                         listDocumentId =
                                             listName?.let { name ->
-                                                FirestoreOps.fetchListDocumentIdFromFirestore(
+                                                fetchListDocumentIdFromFirestore(
                                                     name
                                                 )
                                             }
@@ -125,33 +124,27 @@ class MainActivity : ComponentActivity() {
                                         listName ?: "",
                                         listDocumentId ?: ""
                                     )
-                                    Log.d(
-                                        "SelectList",
-                                        "testing selection of list to print $listDocumentId"
-                                    )
+//                                    Log.d("SelectList", "testing selection of list to print $listDocumentId")
                                 }
 
-                                composable("taskDetail/{listDocumentId}/{taskName}/{taskNotes}") { backStackEntry ->
+                                composable("taskDetail/{listDocumentId}/{taskName}") { backStackEntry ->
                                     val listDocumentId =
                                         backStackEntry.arguments?.getString("listDocumentId")
-                                    val taskName =
-                                        backStackEntry.arguments?.getString("taskName")
-                                    val taskNotes =
-                                        backStackEntry.arguments?.getString("taskNotes")
+                                    val taskName = backStackEntry.arguments?.getString("taskName")
 
                                     TaskDetailScreen(
                                         navController = navController,
                                         listDocumentId = listDocumentId ?: "",
                                         taskName = taskName ?: "",
-                                        taskNotes = taskNotes ?: "",
-                                        onEditTask = { _, editedTaskName, editedTaskNotes ->
+                                        onEditTask = { _, editedTaskName, _ ->
                                             CoroutineScope(Dispatchers.IO).launch {
                                                 try {
                                                     FirestoreOps.editTask(
                                                         listDocumentId ?: "",
                                                         taskName ?: "",
                                                         editedTaskName,
-                                                        editedTaskNotes
+                                                        // You can fetch taskNotes here if needed
+                                                        ""
                                                     )
                                                 } catch (e: Exception) {
                                                     e.printStackTrace()
@@ -160,16 +153,14 @@ class MainActivity : ComponentActivity() {
                                         }
                                     )
                                 }
+
+
                             }
                         }
                     }
                 )
             }
         }
-    }
-
-    private fun isCredentialsValid(username: String, password: String): Boolean {
-        return username.isNotBlank() && password.length >= 6
     }
 
 }

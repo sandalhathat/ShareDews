@@ -49,4 +49,10 @@ object AuthManager {
         auth.addAuthStateListener(listener)
     }
 
+    fun areCredentialsValid(username: String, password: String): Boolean {
+        return username.isNotBlank() && password.length >= 6
+    }
+
+
+
 }

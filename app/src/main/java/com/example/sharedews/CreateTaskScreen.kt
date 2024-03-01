@@ -1,5 +1,7 @@
 package com.example.sharedews
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +48,7 @@ fun CreateTaskScreen(navController: NavController,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-//                .background(color = Color.LightGray)
+                .background(color = Color.LightGray)
         )
 
         // Task Notes input
@@ -55,7 +58,7 @@ fun CreateTaskScreen(navController: NavController,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(4.dp)
-//                .background(color = Color.LightGray)
+                .background(color = Color.LightGray)
         )
 
         // Create Task button
@@ -68,6 +71,7 @@ fun CreateTaskScreen(navController: NavController,
                         //                    LaunchedEffect(Unit) {
                         // Save the new task to Firestore using the list document ID
                         saveTaskToFirestore(listDocumentId, newTaskName.text, newTaskNotes.text)
+                        Log.d("CreateTaskScreen", "just created this new task: $newTaskName")
 //                    }
 
                         // Notify the caller that a new task is created
