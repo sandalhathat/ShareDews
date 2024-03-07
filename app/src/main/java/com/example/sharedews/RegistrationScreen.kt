@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.sharedews.FirestoreOps.addUserDataToDatabase
+import com.example.sharedews.FirestoreOps.addUserDataToDbFS
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -138,7 +138,7 @@ fun handleRegistration(
                     user.sendEmailVerification().await()
 
                     // Call the function to add user data to the database
-                    addUserDataToDatabase(user, UserData(user.uid, email, ""))
+                    addUserDataToDbFS(user, UserData(user.uid, email, ""))
 
                     resultCallback(RegistrationResult.Success(user))
                 } else {

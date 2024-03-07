@@ -1,6 +1,8 @@
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,11 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.sharedews.TestFile
 import com.example.sharedews.ui.theme.ShareDewsTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Composable
 fun TaskDetailScreen(
@@ -64,41 +63,49 @@ fun TaskDetailScreen(
             )
         }
 
-        // Display task notes
-        taskNotes?.let {
-            Text(
-                text = "Task Notes: $it",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(4.dp)
-            )
-        }
-
-        // Box for edit button
-        Box(
+        // Task Name Row with Edit Button
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 8.dp, end = 8.dp),
-            contentAlignment = Alignment.TopEnd
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Edit/Save button
+            // Display task name
+            Text(
+                text = "$taskName",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f)
+            )
+
+            // Edit button for Task Name
             IconButton(
                 onClick = {
-                    if (isEditing) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                onEditTask(listDocumentId, editedTaskName, editedTaskNotes)
-                                withContext(Dispatchers.Main) {
-                                    isEditing = false
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-                    } else {
-                        isEditing = true
-                    }
+                    // Handle Task Name edit logic here
+                    // You can set isEditing to true, similar to how it's done for task notes
                 },
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        // Display task notes
+        taskNotes?.let {
+
+            // Edit Button for Task Notes
+            IconButton(
+                onClick = {
+                    // Handle Task Notes edit logic here
+                    isEditing = !isEditing
+                },
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(4.dp)
             ) {
                 Icon(
                     imageVector = if (isEditing) Icons.Default.Done else Icons.Default.Edit,
@@ -106,11 +113,21 @@ fun TaskDetailScreen(
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
+
+
+
+            Text(
+                text = "Task Notes: $it",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(4.dp)
+            )
         }
 
-        // text field for editing task name
+
+
+        // Text field for editing task name and task notes
         if (isEditing) {
-            // you can customize this part based on how you want the editing ui to look
+            // Customize this part based on how you want the editing UI to look
             TextField(
                 value = editedTaskName,
                 onValueChange = { editedTaskName = it },
@@ -119,7 +136,7 @@ fun TaskDetailScreen(
                     .padding(16.dp)
             )
 
-            // text field for editing task notes
+            // Text field for editing task notes
             TextField(
                 value = editedTaskNotes,
                 onValueChange = { editedTaskNotes = it },
@@ -127,37 +144,39 @@ fun TaskDetailScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-
         }
-
-
     }
 }
 
+
+
 @Composable
-@Preview
+@Preview(apiLevel = 33)
 fun TaskDetailScreenPreview() {
     val navController = rememberNavController()
 
-    // Example task details for preview
-    val taskName = "sample derp"
-    val taskNotes = "sample mcderp, mow lawn, shave derp, " +
-            "eat derp, derpy derp"
-    val onEditTask: (String, String, String) -> Unit =
-        { _, _, _ -> /* Implement the onEditTask logic here */ }
+    // Initialize the testList to force lazy initialization
+    val testList = TestFile.testList
 
     // Create the preview
     ShareDewsTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            TaskDetailScreen(
-                navController = navController,
-                taskName = taskName,
-                taskNotes = taskNotes,
-                listDocumentId = "derpyList",
-                onEditTask = onEditTask
-            )
+            // Check if testList is not empty before accessing its first item
+            if (testList.isNotEmpty()) {
+                val task = testList[0]
+                TaskDetailScreen(
+                    navController = navController,
+                    taskName = task.taskName,
+                    taskNotes = task.taskNotes,
+                    listDocumentId = task.listDocumentId,
+                    onEditTask = { _, _, _ -> /* Implement the onEditTask logic here */ }
+                )
+            } else {
+                Text("Test list is empty.")
+            }
         }
     }
 }
+

@@ -15,24 +15,24 @@ object FirestoreOps {
         FirebaseFirestore.getInstance().collection("lists")
     }
 
-    suspend fun saveTaskToFirestore(listDocumentId: String, taskName: String, taskNotes: String) {
+    suspend fun saveTaskFS(listDocumentId: String, taskName: String, taskNotes: String) {
         try {
-//            val documentReference = collection.document(listDocumentId).collection("tasks")
-//                .add(Task(taskName, taskNotes, false, listDocumentId)).await()
             val documentReference = collection.document(listDocumentId).collection("tasks")
                 .add(mapOf("taskName" to taskName, "taskNotes" to taskNotes, "completed" to false))
                 .await()
+            val taskId = documentReference.id
         } catch (e: Exception) {
             Log.e("FirestoreOps", "Error saving task to Firestore: ${e.message}")
         }
     }
 
     // Updated function to fetch tasks
-    suspend fun fetchTasksFromFirestore(listDocumentId: String): List<Task> {
+    suspend fun fetchTasksFS(listDocumentId: String): List<Task> {
         return try {
             val tasksCollection = collection.document(listDocumentId).collection("tasks")
             val querySnapshot = tasksCollection.get().await()
-            val tasksList = querySnapshot.documents.mapNotNull { document ->
+//            val tasksList = querySnapshot.documents.mapNotNull { document ->
+            var tasksList = querySnapshot.documents.mapNotNull { document ->
                 val taskName = document["taskName"] as? String
                 val taskNotes = document["taskNotes"] as? String
                 val completed = document["completed"] as? Boolean
@@ -55,7 +55,7 @@ object FirestoreOps {
     }
 
     // Updated function to delete task
-    suspend fun deleteTask(listDocumentId: String, taskId: String) {
+    suspend fun deleteTaskFS(listDocumentId: String, taskId: String) {
         try {
             val documentReference =
                 collection.document(listDocumentId).collection("tasks").document(taskId)
@@ -66,7 +66,7 @@ object FirestoreOps {
     }
 
     // Updated function to complete task
-    suspend fun completeTask(listDocumentId: String, taskId: String) {
+    suspend fun completeTaskFS(listDocumentId: String, taskId: String) {
         try {
             val documentReference =
                 collection.document(listDocumentId).collection("tasks").document(taskId)
@@ -78,15 +78,20 @@ object FirestoreOps {
     }
 
     // Updated function to edit task
-    suspend fun editTask(
+    suspend fun editTaskFS(
         listDocumentId: String, taskId: String, newTaskName: String, newTaskNotes: String
     ) {
         try {
+            Log.d(
+                "FirestoreOps",
+                "Editing task - listDocumentId: $listDocumentId, taskId: $taskId, newTaskName: $newTaskName, newTaskNotes: $newTaskNotes"
+            )
             val documentReference =
                 collection.document(listDocumentId).collection("tasks").document(taskId)
             documentReference.update(
                 mapOf("taskName" to newTaskName, "taskNotes" to newTaskNotes)
             ).await()
+            Log.d("FirestoreOps", "Task edited successfully")
         } catch (e: Exception) {
             Log.e("FirestoreOps", "Error editing task in Firestore: ${e.message}")
         }
@@ -94,21 +99,17 @@ object FirestoreOps {
 
 
     // suspend func to create new list in firestore
-    suspend fun saveListToFirestore(
-//        listName: String, owner: String, callback: (String, String) -> Unit
+    suspend fun saveListFS(
         listName: String, owner: String, callback: (String) -> Unit
     ) {
         val firestore = Firebase.firestore
         val listsCollection = firestore.collection("lists")
-//        val documentId = listsCollection.document().id
         val listDocumentId = listsCollection.document().id
-
         val newList = MyList(
             listName = listName, createdOn = Date(), tasks = emptyList(), owner = owner
         )
 
         // set data using generated doc id?
-//        listsCollection.document(documentId).set(newList).addOnSuccessListener {
         listsCollection.document(listDocumentId).set(newList).addOnSuccessListener {
             Log.d(
                 "Firestore",
@@ -116,7 +117,6 @@ object FirestoreOps {
             )
             // call the callback with list name and doc id
             callback("$listName $listDocumentId")
-//            callback(listName, listDocumentId)
         }.addOnFailureListener { e ->
             Log.e("Firestore", "Error creating list $listName", e)
             // handle error, show msg, etc
@@ -125,7 +125,7 @@ object FirestoreOps {
 
 
     // Suspend function to fetch list document ID from Firestore
-    suspend fun fetchListDocumentIdFromFirestore(listName: String): String? {
+    suspend fun fetchListDocumentIdFS(listName: String): String? {
         return try {
             val querySnapshot = collection.whereEqualTo("listName", listName).get().await()
 
@@ -145,7 +145,7 @@ object FirestoreOps {
 
 
     // Suspend function to update the list name in Firestore
-    suspend fun updateListNameInFirestore(listName: String, newName: String) {
+    suspend fun updateListNameFS(listName: String, newName: String) {
         try {
             val querySnapshot = collection.whereEqualTo("listName", listName).get().await()
 
@@ -167,7 +167,7 @@ object FirestoreOps {
 
 
     // Suspend function to delete a list from Firestore
-    suspend fun deleteListFromFirestore(listName: String) {
+    suspend fun deleteListFS(listName: String) {
         try {
             val querySnapshot = collection.whereEqualTo("listName", listName).get().await()
             if (!querySnapshot.isEmpty) {
@@ -183,7 +183,7 @@ object FirestoreOps {
     }
 
 
-    fun addUserDataToDatabase(user: FirebaseUser, userData: UserData) { //should this be suspend?
+    fun addUserDataToDbFS(user: FirebaseUser, userData: UserData) { //should this be suspend?
         val db = Firebase.firestore
 
         // check if user email is verified

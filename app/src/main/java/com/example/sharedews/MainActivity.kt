@@ -22,7 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOps.fetchListDocumentIdFromFirestore
+import com.example.sharedews.FirestoreOps.fetchListDocumentIdFS
 import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.appcheck.ktx.appCheck
@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
                                     LaunchedEffect(listName) {
                                         listDocumentId =
                                             listName?.let { name ->
-                                                fetchListDocumentIdFromFirestore(
+                                                fetchListDocumentIdFS(
                                                     name
                                                 )
                                             }
@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                         onEditTask = { _, editedTaskName, _ ->
                                             CoroutineScope(Dispatchers.IO).launch {
                                                 try {
-                                                    FirestoreOps.editTask(
+                                                    FirestoreOps.editTaskFS(
                                                         listDocumentId ?: "",
                                                         taskName ?: "",
                                                         editedTaskName,

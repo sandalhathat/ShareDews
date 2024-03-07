@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOps.saveListToFirestore
+import com.example.sharedews.FirestoreOps.saveListFS
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
@@ -94,7 +94,7 @@ fun CreateListScreen(
 //                            onListCreated(listName)
 //                        saveListToFirestore(userInputListName.text, owner) { listName ->
 //                            onListCreated(listName)
-                        saveListToFirestore(userInputListName.text, owner) { result ->
+                        saveListFS(userInputListName.text, owner) { result ->
                             onListCreated(result)
 
                             // Notify the caller that a new list is created

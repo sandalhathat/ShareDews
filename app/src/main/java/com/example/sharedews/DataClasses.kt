@@ -2,10 +2,14 @@ package com.example.sharedews
 import java.util.Date
 
 data class Task(
-    val taskName: String,
-    val taskNotes: String,
-    val completed: Boolean = false,
-    val listDocumentId: String,
+//    val taskName: String,
+//    val taskNotes: String,
+//    val completed: Boolean = false,
+//    val listDocumentId: String,
+    var taskName: String,
+    var taskNotes: String,
+    var completed: Boolean = false,
+    var listDocumentId: String,
 )
 
 data class MyList(

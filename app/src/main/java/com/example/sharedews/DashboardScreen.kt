@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOps.deleteListFromFirestore
+import com.example.sharedews.FirestoreOps.deleteListFS
 import com.example.sharedews.ui.theme.ShareDewsTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.getInstance
@@ -184,7 +184,7 @@ fun DeleteListButton(navController: NavController, listName: String, onListDelet
     Button(
         onClick = {
             coroutineScope.launch {
-                deleteListFromFirestore(listName)
+                deleteListFS(listName)
                 // You might want to refresh the UI or perform other actions after deletion
                 onListDeleted()
             }

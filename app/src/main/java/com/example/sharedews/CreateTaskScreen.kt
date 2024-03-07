@@ -24,7 +24,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOps.saveTaskToFirestore
+import com.example.sharedews.FirestoreOps.saveTaskFS
 import kotlinx.coroutines.launch
 
 @Composable
@@ -70,7 +70,7 @@ fun CreateTaskScreen(navController: NavController,
                     lifecycleOwner.lifecycleScope.launch {
                         //                    LaunchedEffect(Unit) {
                         // Save the new task to Firestore using the list document ID
-                        saveTaskToFirestore(listDocumentId, newTaskName.text, newTaskNotes.text)
+                        saveTaskFS(listDocumentId, newTaskName.text, newTaskNotes.text)
                         Log.d("CreateTaskScreen", "just created this new task: $newTaskName")
 //                    }
 

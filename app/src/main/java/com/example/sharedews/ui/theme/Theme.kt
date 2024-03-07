@@ -24,7 +24,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80,
-//    background = TextBoxBackgroundColor
+    background = TextBoxBackgroundColor
 //    textboxBackground = TextBoxBackgroundColor
 
 )
@@ -32,7 +32,8 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+    background = TextBoxBackgroundColor
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -52,7 +53,7 @@ fun TextBoxBackground(
 ) {
     Box(
         modifier = modifier.background(TextBoxBackgroundColor),
-        content = { content(modifier)}
+        content = { content(modifier) }
     )
 }
 

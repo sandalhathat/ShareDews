@@ -34,10 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.sharedews.FirestoreOps.completeTask
-import com.example.sharedews.FirestoreOps.deleteTask
-import com.example.sharedews.FirestoreOps.editTask
-import com.example.sharedews.FirestoreOps.updateListNameInFirestore
+import com.example.sharedews.FirestoreOps.completeTaskFS
+import com.example.sharedews.FirestoreOps.deleteTaskFS
+import com.example.sharedews.FirestoreOps.updateListNameFS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -109,8 +108,8 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                 )
             }
 
-            // edit button?
-            // edit button?
+
+            // edit list name button?
             IconButton(
                 onClick = {
                     if (isEditing) {
@@ -118,9 +117,7 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                         val finalNewListName = newListName // create a final var?
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
-
-                                updateListNameInFirestore(listDocumentId, finalNewListName)
-//                                updateListNameInFirestore(listName, finalNewListName)
+                                updateListNameFS(listDocumentId, finalNewListName)
                                 withContext(Dispatchers.Main) {
                                     isEditing = false
                                     Log.d(
@@ -159,16 +156,16 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
         // Render the list of tasks
         // call function from taskslist composable where you render the list of tasks
         TasksList(
-            tasks ?: emptyList(),
+            tasks?.toMutableList() ?: mutableListOf<Task>(),
             onDeleteTask = { taskName: String ->
-                CoroutineScope(Dispatchers.IO).launch { deleteTask(listDocumentId, taskName) }
+                CoroutineScope(Dispatchers.IO).launch { deleteTaskFS(listDocumentId, taskName) }
             },
             onCompleteTask = { taskName: String ->
-                CoroutineScope(Dispatchers.IO).launch { completeTask(listDocumentId, taskName) }
+                CoroutineScope(Dispatchers.IO).launch { completeTaskFS(listDocumentId, taskName) }
             },
             onEditTask = { taskName: String, newTaskName: String, newTaskNotes: String ->
                 CoroutineScope(Dispatchers.IO).launch {
-                    editTask(listDocumentId, taskName, newTaskName, newTaskNotes)
+                    taskViewModel.editTask(listDocumentId, taskName, newTaskName, newTaskNotes)
                 }
             },
             onTaskClick = { taskName: String, taskNotes: String ->
@@ -206,14 +203,12 @@ fun ListDetailScreen(navController: NavController, listName: String, listDocumen
                 lifecycleOwner = LocalLifecycleOwner.current,
                 onTaskCreated = { taskName, taskNotes ->
                     // add new task to list
-                    taskViewModel.setTasks(
-                        tasks.orEmpty() + Task(
-                            taskName,
-                            taskNotes,
-                            false,
-                            listDocumentId
-                        )
-                    )
+                    val updatedTasks = (tasks?.toMutableList() ?: mutableListOf()).apply {
+                        add(Task(taskName, taskNotes, false, listDocumentId))
+                    }
+
+                    taskViewModel.setTasks(updatedTasks)
+
                     // close bottom sheet
                     isCreateTaskSheetVisible = false
                 }

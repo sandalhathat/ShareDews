@@ -18,15 +18,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.sharedews.ui.theme.ShareDewsTheme
 
 @Composable
 fun TasksList(
-    tasks: List<Task>,
+    tasks: MutableList<Task>,
     onDeleteTask: (String) -> Unit,
     onCompleteTask: (String) -> Unit,
     onEditTask: (String, String, String) -> Unit,
@@ -41,14 +41,12 @@ fun TasksList(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-
-            items(tasks) { task ->
+            items(mutableStateListOf(*tasks.toTypedArray())) { task ->
                 Log.d("TasksList", "Iterating through task: $task")
                 // De-structure the item to access its properties
                 val taskName = task.taskName
-                val taskNotes = task.taskNotes
                 // Log statement to check iteration through tasks
-                Log.d("TasksList", "Iterating through task: $taskName, $taskNotes")
+                Log.d("TasksList", "Iterating through task: $taskName")
 
                 Column(
                     modifier = Modifier
@@ -61,8 +59,7 @@ fun TasksList(
                             .fillMaxWidth()
                             .clickable {
                                 // Log statement to check if onTaskClick is invoked
-                                Log.d("TasksList", "Clicked on task: $taskName, $taskNotes")
-//                                onTaskClick(taskName, taskNotes)
+                                Log.d("TasksList", "Clicked on task: $taskName")
                                 onTaskClick(task.listDocumentId, task.taskName)
                             }
                             .padding(16.dp)
@@ -76,10 +73,6 @@ fun TasksList(
                         Column {
                             Text(
                                 text = taskName,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = taskNotes,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -104,21 +97,14 @@ fun TasksList(
 @Preview
 @Composable
 fun TasksListPreview() {
-    val sampleTasks = listOf(
-        Task("Task 1", "Description 1", false, "yourListDocumentId"),
-        Task("Task 2", "Description 2", false, "yourListDocumentId"),
-        Task("Task 3", "Description 3", false, "yourListDocumentId")
+    val sampleTasks = TestFile.testList.toMutableList()
+    TasksList(
+        tasks = sampleTasks,
+        onDeleteTask = { taskName -> /* Implement onDeleteTask logic */ },
+        onCompleteTask = { taskName -> /* Implement onCompleteTask logic */ },
+        onEditTask = { taskName, newTaskName, newTaskNotes -> /* Implement onEditTask logic */ },
+        onTaskClick = { taskName, taskNotes -> /* Implement onTaskClick logic */ }
     )
-
-    ShareDewsTheme {
-        TasksList(
-            tasks = sampleTasks,
-            onDeleteTask = { taskName -> /* Implement onDeleteTask logic */ },
-            onCompleteTask = { taskName -> /* Implement onCompleteTask logic */ },
-            onEditTask = { taskName, newTaskName, newTaskNotes -> /* Implement onEditTask logic */ },
-            onTaskClick = { taskName, taskNotes -> /* Implement onTaskClick logic */ }
-        )
-    }
 }
 
 
